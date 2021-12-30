@@ -1,16 +1,16 @@
 package de.vorb.tesseract.tools.recognition;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bytedeco.tesseract.global.tesseract;
+
 import de.vorb.tesseract.util.Block;
 import de.vorb.tesseract.util.Box;
 import de.vorb.tesseract.util.Line;
 import de.vorb.tesseract.util.Paragraph;
 import de.vorb.tesseract.util.Symbol;
 import de.vorb.tesseract.util.Word;
-
-import org.bytedeco.javacpp.tesseract;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class PageRecognitionConsumer extends
         DefaultRecognitionConsumer {

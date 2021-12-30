@@ -4,12 +4,16 @@ import de.vorb.tesseract.gui.controller.TesseractController;
 import de.vorb.tesseract.tools.recognition.RecognitionProducer;
 import de.vorb.tesseract.util.feat.Feature3D;
 
+import javax.imageio.ImageIO;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.lept;
-import org.bytedeco.javacpp.tesseract;
+import org.bytedeco.leptonica.PIX;
+import org.bytedeco.leptonica.global.lept;
+import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
+import org.bytedeco.tesseract.TBLOB;
+import org.bytedeco.tesseract.global.tesseract;
 
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -26,7 +30,7 @@ import java.util.Optional;
 
 public class PageRecognitionProducer extends RecognitionProducer {
     private final Path tessdataDir;
-    private Optional<lept.PIX> lastPix = Optional.empty();
+    private Optional<PIX> lastPix = Optional.empty();
 
     private final TesseractController controller;
     private final HashMap<String, String> variables = new HashMap<>();
@@ -92,18 +96,18 @@ public class PageRecognitionProducer extends RecognitionProducer {
             lept.pixDestroy(lastPix.get());
         }
 
-        final lept.PIX pix = lept.pixRead(imageFile.toString());
+        final PIX pix = lept.pixRead(imageFile.toString());
 
         tesseract.TessBaseAPISetImage2(getHandle(), pix);
 
         lastPix = Optional.of(pix);
     }
 
-    public Optional<lept.PIX> getImage() {
+    public Optional<PIX> getImage() {
         return lastPix;
     }
 
-    public Optional<lept.PIX> getThresholdedImage() {
+    public Optional<PIX> getThresholdedImage() {
         return Optional.ofNullable(tesseract.TessBaseAPIGetThresholdedImage(getHandle()));
     }
 
@@ -141,13 +145,13 @@ public class PageRecognitionProducer extends RecognitionProducer {
             return new LinkedList<>();
         }
 
-        try (final lept.PIX pixSymbol = lept.pixRead(symbolFile);
+        try (final PIX pixSymbol = lept.pixRead(symbolFile);
              final IntPointer numFeatures = new IntPointer(1);
              final IntPointer outlineIndexes = new IntPointer(512);
              final BytePointer features = new BytePointer(4 * 512);
-             final tesseract.INT_FEATURE_STRUCT intFeatures = new tesseract.INT_FEATURE_STRUCT(features)) {
+             final INT_FEATURE_STRUCT intFeatures = new INT_FEATURE_STRUCT(features)) {
 
-            final tesseract.TBLOB blob = tesseract.TessMakeTBLOB(pixSymbol);
+            final TBLOB blob = tesseract.TessMakeTBLOB(pixSymbol);
 
             lept.pixDestroy(pixSymbol);
 

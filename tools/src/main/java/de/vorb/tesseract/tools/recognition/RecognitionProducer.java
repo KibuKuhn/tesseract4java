@@ -1,14 +1,20 @@
 package de.vorb.tesseract.tools.recognition;
 
-import org.bytedeco.javacpp.tesseract;
 
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.bytedeco.tesseract.PageIterator;
+import org.bytedeco.tesseract.ResultIterator;
+import org.bytedeco.tesseract.TessBaseAPI;
+import org.bytedeco.tesseract.global.tesseract;
+
+
+
 public abstract class RecognitionProducer implements Closeable {
     public static final String DEFAULT_TRAINING_FILE = "eng";
 
-    private tesseract.TessBaseAPI handle;
+    private TessBaseAPI handle;
     private String trainingFile = DEFAULT_TRAINING_FILE;
 
     public RecognitionProducer() {
@@ -18,7 +24,7 @@ public abstract class RecognitionProducer implements Closeable {
         setTrainingFile(trainingFile);
     }
 
-    public tesseract.TessBaseAPI getHandle() {
+    public TessBaseAPI getHandle() {
         return this.handle;
     }
 
@@ -30,7 +36,7 @@ public abstract class RecognitionProducer implements Closeable {
         this.trainingFile = trainingFile;
     }
 
-    protected void setHandle(tesseract.TessBaseAPI handle) {
+    protected void setHandle(TessBaseAPI handle) {
         this.handle = handle;
     }
 
@@ -40,17 +46,16 @@ public abstract class RecognitionProducer implements Closeable {
 
     public abstract void close() throws IOException;
 
-    @SuppressWarnings("unchecked")
     public void recognize(RecognitionConsumer consumer) {
         // text recognition
         tesseract.TessBaseAPIRecognize(getHandle(), null);
 
         // get the result iterator
-        final tesseract.ResultIterator resultIt =
+        final ResultIterator resultIt =
                 tesseract.TessBaseAPIGetIterator(getHandle());
 
         // get the page iterator
-        final tesseract.PageIterator pageIt =
+        final PageIterator pageIt =
                 tesseract.TessResultIteratorGetPageIterator(resultIt);
 
         // set the recognition state

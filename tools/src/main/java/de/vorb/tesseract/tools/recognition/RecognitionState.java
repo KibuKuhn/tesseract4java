@@ -1,28 +1,34 @@
 package de.vorb.tesseract.tools.recognition;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bytedeco.javacpp.BoolPointer;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.leptonica.PIX;
+import org.bytedeco.tesseract.ChoiceIterator;
+import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
+import org.bytedeco.tesseract.PageIterator;
+import org.bytedeco.tesseract.ResultIterator;
+import org.bytedeco.tesseract.TBLOB;
+import org.bytedeco.tesseract.TessBaseAPI;
+import org.bytedeco.tesseract.global.tesseract;
+
 import de.vorb.tesseract.util.AlternativeChoice;
 import de.vorb.tesseract.util.Baseline;
 import de.vorb.tesseract.util.Box;
 import de.vorb.tesseract.util.FontAttributes;
 
-import org.bytedeco.javacpp.BoolPointer;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.lept;
-import org.bytedeco.javacpp.tesseract;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
 public class RecognitionState {
 
-    private final tesseract.TessBaseAPI apiHandle;
-    private final tesseract.ResultIterator resultIt;
-    private final tesseract.PageIterator pageIt;
+    private final TessBaseAPI apiHandle;
+    private final ResultIterator resultIt;
+    private final PageIterator pageIt;
 
-    public RecognitionState(tesseract.TessBaseAPI apiHandle, tesseract.ResultIterator resultIt,
-            tesseract.PageIterator pageIt) {
+    public RecognitionState(TessBaseAPI apiHandle, ResultIterator resultIt,
+            PageIterator pageIt) {
         this.apiHandle = apiHandle;
         this.resultIt = resultIt;
         this.pageIt = pageIt;
@@ -102,7 +108,7 @@ public class RecognitionState {
     public List<AlternativeChoice> getAlternatives() {
         final List<AlternativeChoice> alternatives = new ArrayList<>();
 
-        final tesseract.ChoiceIterator choiceIt = tesseract.TessResultIteratorGetChoiceIterator(resultIt);
+        final ChoiceIterator choiceIt = tesseract.TessResultIteratorGetChoiceIterator(resultIt);
 
         // pull out all choices
         do {
@@ -115,17 +121,17 @@ public class RecognitionState {
         return alternatives;
     }
 
-    private void getSymbolFeatures(lept.PIX image) {
+    private void getSymbolFeatures(PIX image) {
 
         try (final IntPointer left = new IntPointer(1);
              final IntPointer top = new IntPointer(1);
              final IntPointer numFeatures = new IntPointer(1);
              final IntPointer featOutlineIndex = new IntPointer(1);
-             final tesseract.INT_FEATURE_STRUCT intFeatures = new tesseract.INT_FEATURE_STRUCT(
+             final INT_FEATURE_STRUCT intFeatures = new INT_FEATURE_STRUCT(
                      new BytePointer(4 * 512))) {
 
-            final lept.PIX pix = tesseract.TessPageIteratorGetImage(pageIt, tesseract.RIL_SYMBOL, 1, image, left, top);
-            final tesseract.TBLOB blob = tesseract.TessMakeTBLOB(pix);
+            final PIX pix = tesseract.TessPageIteratorGetImage(pageIt, tesseract.RIL_SYMBOL, 1, image, left, top);
+            final TBLOB blob = tesseract.TessMakeTBLOB(pix);
 
             tesseract.TessBaseAPIGetFeaturesForBlob(apiHandle, blob, intFeatures, numFeatures, featOutlineIndex);
         }

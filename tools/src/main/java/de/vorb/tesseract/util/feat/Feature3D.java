@@ -1,8 +1,8 @@
 package de.vorb.tesseract.util.feat;
 
-import org.bytedeco.javacpp.tesseract;
-
 import java.nio.ByteBuffer;
+
+import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
 
 public class Feature3D {
     private final byte x, y, theta; // features
@@ -45,7 +45,7 @@ public class Feature3D {
         return outlineIndex;
     }
 
-    public static Feature3D valueOf(tesseract.INT_FEATURE_STRUCT feat, int outlineIndex) {
+    public static Feature3D valueOf(INT_FEATURE_STRUCT feat, int outlineIndex) {
         final ByteBuffer buf = feat.asByteBuffer();
         return new Feature3D(
                 buf.get(0) & 0xFF,
