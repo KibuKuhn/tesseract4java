@@ -1,6 +1,6 @@
 package de.vorb.tesseract.util;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * Font attributes of a recognized word.

@@ -1,58 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.vorb.tesseract</groupId>
-        <artifactId>tesseract4java</artifactId>
-        <version>0.3.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>de.vorb.tesseract</groupId>
+		<artifactId>tesseract4java</artifactId>
+		<version>0.3.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>tools</artifactId>
+	<artifactId>tools</artifactId>
 
-    <properties>
-        <tesseract.version>4.1.1-1.5.6</tesseract.version>
-    </properties>
+	<properties>
+		<tesseract.version>4.1.1-1.5.6</tesseract.version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tesseract-platform</artifactId>
-            <version>${tesseract.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>ij</artifactId>
-            <version>1.52h</version>
-        </dependency>
-        <dependency>
-            <groupId>de.biomedical-imaging.ij</groupId>
-            <artifactId>ij_blob</artifactId>
-            <version>1.4.9</version>
-        </dependency>
-        <dependency>
-            <groupId>de.vorb.tesseract</groupId>
-            <artifactId>ocrevalUAtion</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>tesseract-platform</artifactId>
+			<version>${tesseract.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+			<version>1.52h</version>
+		</dependency>
+		<dependency>
+			<groupId>de.biomedical-imaging.ij</groupId>
+			<artifactId>ij_blob</artifactId>
+			<version>1.4.9</version>
+		</dependency>
+		<dependency>
+			<groupId>de.vorb.tesseract</groupId>
+			<artifactId>ocrevalUAtion</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-        <repository>
-            <id>imagej</id>
-            <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>imagej</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

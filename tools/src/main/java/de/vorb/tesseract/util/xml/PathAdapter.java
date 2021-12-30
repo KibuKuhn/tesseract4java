@@ -1,8 +1,9 @@
 package de.vorb.tesseract.util.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public class PathAdapter extends XmlAdapter<String, Path> {
     @Override

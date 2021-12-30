@@ -5,16 +5,17 @@
 
 package de.vorb.tesseract.gui.view;
 
-import sun.swing.DefaultLookup;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.nio.file.Path;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JList;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
-import java.awt.Component;
-import java.nio.file.Path;
 
 /**
  * @author Paul Vorbach
@@ -35,7 +36,7 @@ public class PageListCellRenderer extends DefaultListCellRenderer {
     protected static Border noFocusBorder = DEFAULT_NO_FOCUS_BORDER;
 
     private Border getNoFocusBorder() {
-        Border border = DefaultLookup.getBorder(this, ui, "List.cellNoFocusBorder");
+        Border border = UIManager.getBorder("List.cellNoFocusBorder");
         if (System.getSecurityManager() != null) {
             if (border != null)
                 return border;
@@ -66,8 +67,8 @@ public class PageListCellRenderer extends DefaultListCellRenderer {
                 && !dropLocation.isInsert()
                 && dropLocation.getIndex() == index) {
 
-            bg = DefaultLookup.getColor(this, ui, "List.dropCellBackground");
-            fg = DefaultLookup.getColor(this, ui, "List.dropCellForeground");
+            bg = UIManager.getColor("List.dropCellBackground");
+            fg = UIManager.getColor("List.dropCellForeground");
 
             isSelected = true;
         }
@@ -96,12 +97,10 @@ public class PageListCellRenderer extends DefaultListCellRenderer {
         Border border = null;
         if (cellHasFocus) {
             if (isSelected) {
-                border = DefaultLookup.getBorder(this, ui,
-                        "List.focusSelectedCellHighlightBorder");
+                border = UIManager.getBorder("List.focusSelectedCellHighlightBorder");
             }
             if (border == null) {
-                border = DefaultLookup.getBorder(this, ui,
-                        "List.focusCellHighlightBorder");
+                border = UIManager.getBorder("List.focusCellHighlightBorder");
             }
         } else {
             border = getNoFocusBorder();

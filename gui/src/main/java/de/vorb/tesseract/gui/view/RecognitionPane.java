@@ -1,33 +1,8 @@
 package de.vorb.tesseract.gui.view;
 
-import de.vorb.tesseract.gui.model.BoxFileModel;
-import de.vorb.tesseract.gui.model.PageModel;
-import de.vorb.tesseract.gui.model.Scale;
-import de.vorb.tesseract.gui.view.renderer.RecognitionRenderer;
-import de.vorb.tesseract.util.AlternativeChoice;
-import de.vorb.tesseract.util.FontAttributes;
-import de.vorb.tesseract.util.Symbol;
-import de.vorb.tesseract.util.Word;
-
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JSplitPane;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.MouseInputAdapter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -38,6 +13,30 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.MouseInputAdapter;
+
+import de.vorb.tesseract.gui.model.BoxFileModel;
+import de.vorb.tesseract.gui.model.PageModel;
+import de.vorb.tesseract.gui.model.Scale;
+import de.vorb.tesseract.gui.view.renderer.RecognitionRenderer;
+import de.vorb.tesseract.util.AlternativeChoice;
+import de.vorb.tesseract.util.FontAttributes;
+import de.vorb.tesseract.util.Symbol;
+import de.vorb.tesseract.util.Word;
 
 public class RecognitionPane extends JPanel implements PageModelComponent {
     private static final long serialVersionUID = 1L;

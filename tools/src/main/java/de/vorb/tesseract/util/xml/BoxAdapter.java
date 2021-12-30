@@ -1,8 +1,8 @@
 package de.vorb.tesseract.util.xml;
 
 import de.vorb.tesseract.util.Box;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class BoxAdapter extends XmlAdapter<String, Box> {
     @Override
