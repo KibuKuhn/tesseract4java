@@ -1,60 +1,19 @@
 # tesseract4java: Tesseract GUI
 
-
-A graphical user interface for the [Tesseract OCR engine][tesseract]. The program has been introduced in the [Master’s
-thesis “Analyses and Heuristics for the Improvement of Optical Character Recognition Results for Fraktur Texts”][thesis]
-by Paul Vorbach (German).
-
+## Forked from https://github.com/tesseract4java/tesseract4java
+A graphical user interface for the [Tesseract OCR engine][tesseract].
 [tesseract]: https://github.com/tesseract-ocr/tesseract
-[thesis]: http://nbn-resolving.de/urn/resolver.pl?urn:nbn:de:bvb:20-opus-106527
 
-
-## Usage
-Basic usage is documented on [our wiki page](https://github.com/tesseract4java/tesseract4java/wiki/Usage)
-
-## Screenshots
-
-![Preprocessing](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-preprocessing.png)
-
-Preprocessing view
-
-![Box Editor](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-box-editor.png)
-
-Box editor for training
-
-![Glyph Overview](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-glyph-overview.png)
-
-Glyph overview for easier detection of errors
-
-![Comparison View](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-comparison.png)
-
-Comparison view to compare the original document with the perceived result
-
-![Transcription View](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-evaluation.png)
-
-Evaluation view with a transcription field
-
-![ocrevalUAtion](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/ocrevaluation.png)
-
-[ocrevalUAtion]
-
-![Batch Export](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-batch-export.png)
-
-Batch export functionality to handle large projects
 
 
 ## Building and running the software
 
 ### This fork expects at least java 11
 
-This software is written in Java and can be built using [Apache Maven]. In order to build the software you have to
-follow these steps:
-
- 1. `git clone https://github.com/tesseract4java/tesseract4java.git`
- 2. `cd tesseract4java`
- 3. `git submodule init`
- 4. `git submodule update`
- 5. `mvn clean package -Pstandalone`. This will include the Tesseract binaries for your platform. You can manually
+ This project uses submodules
+ 1. `git submodule init`
+ 2. `git submodule update`
+ 3. `mvn clean package -Pstandalone`. This will include the Tesseract binaries for your platform. You can manually
     define the platform by providing the option `-Djavacpp.platform=[PLATFORM]` (available platforms are
     `windows-x86_64`, `windows-x86`, `linux-x86_64`, `linux-x86`, and `macosx-x86_64`).
 
