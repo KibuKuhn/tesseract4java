@@ -9,8 +9,6 @@ by Paul Vorbach (German).
 [thesis]: http://nbn-resolving.de/urn/resolver.pl?urn:nbn:de:bvb:20-opus-106527
 
 
-[![Donate with PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LF8T2JP2YUUUE)
-
 ## Usage
 Basic usage is documented on [our wiki page](https://github.com/tesseract4java/tesseract4java/wiki/Usage)
 
@@ -53,6 +51,8 @@ Batch export functionality to handle large projects
 
 
 ## Building and running the software
+
+# This fork expects at least java 11
 
 This software is written in Java and can be built using [Apache Maven]. In order to build the software you have to
 follow these steps:
