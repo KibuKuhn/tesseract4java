@@ -12,13 +12,6 @@ by Paul Vorbach (German).
 ## Usage
 Basic usage is documented on [our wiki page](https://github.com/tesseract4java/tesseract4java/wiki/Usage)
 
-## Download
-
-Binary distributions and release notes are available in the [releases section].
-
-[Releases section]: https://github.com/tesseract4java/tesseract4java/releases
-
-
 ## Screenshots
 
 ![Preprocessing](https://raw.githubusercontent.com/tesseract4java/tesseract-gui/master/screenshots/gui-preprocessing.png)
