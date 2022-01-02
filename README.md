@@ -45,7 +45,7 @@ Batch export functionality to handle large projects
 
 ## Building and running the software
 
-# This fork expects at least java 11
+### This fork expects at least java 11
 
 This software is written in Java and can be built using [Apache Maven]. In order to build the software you have to
 follow these steps:
