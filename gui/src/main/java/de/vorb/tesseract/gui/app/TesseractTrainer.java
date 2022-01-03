@@ -1,4 +1,4 @@
-package de.vorb.tesseract.gui.controller;
+package de.vorb.tesseract.gui.app;
 
 import de.vorb.tesseract.gui.model.PreferencesUtil;
 import de.vorb.tesseract.gui.view.TesseractFrame;

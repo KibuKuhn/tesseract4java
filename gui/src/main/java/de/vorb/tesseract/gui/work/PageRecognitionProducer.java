@@ -1,6 +1,6 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.controller.TesseractController;
+import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.tools.recognition.RecognitionProducer;
 import de.vorb.tesseract.util.feat.Feature3D;
 
@@ -32,11 +32,11 @@ public class PageRecognitionProducer extends RecognitionProducer {
     private final Path tessdataDir;
     private Optional<PIX> lastPix = Optional.empty();
 
-    private final TesseractController controller;
+    private final TesseractApp controller;
     private final HashMap<String, String> variables = new HashMap<>();
     private int pageSegmentationMode = tesseract.PSM_AUTO;
 
-    public PageRecognitionProducer(TesseractController controller,
+    public PageRecognitionProducer(TesseractApp controller,
             Path tessdataDir, String trainingFile) {
         super(trainingFile);
 

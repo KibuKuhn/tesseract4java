@@ -17,41 +17,34 @@
  */
 package eu.digitisation.distance;
 
-import eu.digitisation.text.StringNormalizer;
-import eu.digitisation.text.Text;
-import java.io.File;
-import java.net.URL;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- *
- * @author rafa
- */
+import org.junit.jupiter.api.Test;
+
+import eu.digitisation.text.StringNormalizer;
+
 public class EditDistanceTest {
 
     @Test
     public void testWeights() {
-        System.out.println("Weighted distance");
         EdOpWeight w = new OcrOpWeight();
         String s1 = "a b";
         String s2 = "acb";
         int expResult = 2;
         int result = EditDistance.charDistance(s1, s2, w, 50);
-        assertEquals(expResult, result);
+        assertThat(result).isEqualTo(expResult);
     }
 
     /**
      * Test of wordDistance method, of class EditDistance.
      */
     @Test
-    public void testWordDistance() {
-        System.out.println("wordDistance");
+    public void testWordDistance() {        
         String s1 = "p a t a t a";
         String s2 = "a p t a";
         int expResult = 3;
         int[] result = EditDistance.wordDistance(s1, s2, 10);
-        assertEquals(expResult, result[2]);
+        assertThat(result[2]).isEqualTo(expResult);
     }
 
     @Test
@@ -62,21 +55,21 @@ public class EditDistanceTest {
         OcrOpWeight W = new OcrOpWeight(); // fully-sensitive
         String r1 = StringNormalizer.canonical(s1, false, false, false);
         String r2 = StringNormalizer.canonical(s2, false, false, false);
-        assertEquals(3, EditDistance.charDistance(r1, r2, W, 1000));
+        assertThat(EditDistance.charDistance(r1, r2, W, 1000)).isEqualTo(3);
 
         W = new OcrOpWeight(true); //ignore everything
         r1 = StringNormalizer.canonical(s1, true, true, true);
         r2 = StringNormalizer.canonical(s2, true, true, true);
-        assertEquals(0, EditDistance.charDistance(r1, r2, W, 1000));
+        assertThat(EditDistance.charDistance(r1, r2, W, 1000)).isEqualTo(0);
 
         W = new OcrOpWeight(true); //ignore diacritics
         r1 = StringNormalizer.canonical(s1, false, true, true);
         r2 = StringNormalizer.canonical(s2, false, true, true);
-        assertEquals(2, EditDistance.charDistance(r1, r2, W, 1000));
+        assertThat(EditDistance.charDistance(r1, r2, W, 1000)).isEqualTo(2);
 
         W = new OcrOpWeight(true); //ignore case
         r1 = StringNormalizer.canonical(s1, true, false, true);
         r2 = StringNormalizer.canonical(s2, true, false, true);
-        assertEquals(2, EditDistance.charDistance(r1, r2, W, 1000));
+        assertThat(EditDistance.charDistance(r1, r2, W, 1000)).isEqualTo(2);
     }
 }

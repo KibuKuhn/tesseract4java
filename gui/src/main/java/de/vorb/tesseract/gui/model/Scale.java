@@ -1,12 +1,17 @@
 package de.vorb.tesseract.gui.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Observable;
 
-public class Scale extends Observable {
+import de.vorb.tesseract.gui.event.ScaleEvent;
+import de.vorb.tesseract.gui.event.ScaleListener;
+
+public class Scale {
     private static final float[] VALUES =
             new float[]{0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.75f, 1f, 2f};
     private int cursor = 2;
+	private List<ScaleListener> scaleListeners = new ArrayList<>();
 
     public boolean hasNext() {
         return cursor < VALUES.length - 1;
@@ -48,13 +53,12 @@ public class Scale extends Observable {
         changed();
     }
 
-    private void changed() {
-        setChanged();
-        notifyObservers();
-        clearChanged();
-    }
+	private void changed() {
+		ScaleEvent event = new ScaleEvent(this);
+		scaleListeners.forEach(listener -> listener.scaleChanged(event));
+	}
 
-    @Override
+	@Override
     public String toString() {
         final String result;
 
@@ -96,5 +100,13 @@ public class Scale extends Observable {
 
     public static int unscaled(int coord, float scale) {
         return Math.round(coord / scale);
+    }
+    
+    public void addScaleListener(ScaleListener scaleListener) {
+    	scaleListeners.add(scaleListener);
+    }
+    
+    public void removeScaleListener(ScaleListener scaleListener) {
+    	scaleListeners.remove(scaleListener);
     }
 }

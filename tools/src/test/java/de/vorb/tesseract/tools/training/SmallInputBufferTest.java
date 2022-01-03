@@ -1,63 +1,60 @@
 package de.vorb.tesseract.tools.training;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class SmallInputBufferTest {
-    private static final byte[] bytes = new byte[256];
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-    @Test
-    public void testReadByte() throws IOException {
-        final InputBuffer buf = InputBuffer.allocate(new ByteArrayInputStream(
-                bytes), 4096);
+class SmallInputBufferTest {
+	private static final byte[] BYTES = new byte[256];
 
-        int i = 0;
-        while (buf.readByte()) {
-            i++;
-        }
+	private InputBuffer buf;
 
-        Assert.assertEquals("preliminary end of stream", bytes.length, i);
-    }
+	@BeforeEach
+	void setUp() {
+		buf = InputBuffer.allocate(new ByteArrayInputStream(BYTES), 4096);
+	}
 
-    @Test
-    public void testReadShort() throws IOException {
-        final InputBuffer buf = InputBuffer.allocate(new ByteArrayInputStream(
-                bytes), 4096);
+	@Test
+	void testReadByte() throws IOException {
+		int i = 0;
+		while (buf.readByte()) {
+			i++;
+		}
 
-        int i = 0;
-        while (buf.readShort()) {
-            i++;
-        }
+		assertThat(i).isEqualTo(BYTES.length);
+	}
 
-        Assert.assertEquals("preliminary end of stream", bytes.length / 2, i);
-    }
+	@Test
+	void testReadShort() throws IOException {
+		int i = 0;
+		while (buf.readShort()) {
+			i++;
+		}
 
-    @Test
-    public void testReadInt() throws IOException {
-        final InputBuffer buf = InputBuffer.allocate(new ByteArrayInputStream(
-                bytes), 4096);
+		assertThat(i).isEqualTo(BYTES.length / 2);
+	}
 
-        int i = 0;
-        while (buf.readInt()) {
-            i++;
-        }
+	@Test
+	void testReadInt() throws IOException {
+		int i = 0;
+		while (buf.readInt()) {
+			i++;
+		}
 
-        Assert.assertEquals("preliminary end of stream", bytes.length / 4, i);
-    }
+		assertThat(i).isEqualTo(BYTES.length / 4);
+	}
 
-    @Test
-    public void testReadLong() throws IOException {
-        final InputBuffer buf = InputBuffer.allocate(new ByteArrayInputStream(
-                bytes), 4096);
+	@Test
+	void testReadLong() throws IOException {
+		int i = 0;
+		while (buf.readLong()) {
+			i++;
+		}
 
-        int i = 0;
-        while (buf.readLong()) {
-            i++;
-        }
-
-        Assert.assertEquals("preliminary end of stream", bytes.length / 8, i);
-    }
+		assertThat(i).isEqualTo(BYTES.length / 8);
+	}
 }

@@ -1,6 +1,6 @@
 package de.vorb.tesseract.gui.view.dialogs;
 
-import de.vorb.tesseract.gui.controller.TesseractController;
+import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.gui.model.BatchExportModel;
 
 import javax.swing.BoxLayout;
@@ -54,7 +54,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
     private final JButton btnCancel;
     private final JCheckBox chckbxOpenDestination;
 
-    private final TesseractController controller;
+    private final TesseractApp controller;
 
     private BatchExportModel exportModel = null;
     private JCheckBox chckbxExportImages;
@@ -65,7 +65,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
     /**
      * Create the panel.
      */
-    public BatchExportDialog(TesseractController controller) {
+    public BatchExportDialog(TesseractApp controller) {
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 BatchExportDialog.class.getResource("/icons/book_next.png")));
         setLocationRelativeTo(controller.getView());
@@ -260,7 +260,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
     }
 
     public static Optional<BatchExportModel> showBatchExportDialog(
-            TesseractController controller) {
+            TesseractApp controller) {
         final BatchExportDialog dialog = new BatchExportDialog(controller);
         dialog.setVisible(true);
 

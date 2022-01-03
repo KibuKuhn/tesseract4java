@@ -1,6 +1,6 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.controller.TesseractController;
+import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.gui.model.BatchExportModel;
 import de.vorb.tesseract.gui.model.ProjectModel;
 import de.vorb.tesseract.gui.util.DocumentWriter;
@@ -37,11 +37,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BatchExecutor {
-    private final TesseractController controller;
+    private final TesseractApp controller;
     private final ProjectModel project;
     private final BatchExportModel export;
 
-    public BatchExecutor(TesseractController controller, ProjectModel project,
+    public BatchExecutor(TesseractApp controller, ProjectModel project,
             BatchExportModel export) {
 
         this.controller = controller;

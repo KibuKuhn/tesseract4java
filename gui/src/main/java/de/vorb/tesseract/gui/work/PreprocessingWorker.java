@@ -1,6 +1,6 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.controller.TesseractController;
+import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.gui.model.ImageModel;
 import de.vorb.tesseract.tools.preprocessing.Preprocessor;
 import de.vorb.util.FileNames;
@@ -15,12 +15,12 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 public class PreprocessingWorker extends SwingWorker<ImageModel, Void> {
-    private final TesseractController controller;
+    private final TesseractApp controller;
     private final Preprocessor preprocessor;
     private final Path sourceFile;
     private final Path destinationDir;
 
-    public PreprocessingWorker(TesseractController controller,
+    public PreprocessingWorker(TesseractApp controller,
             Preprocessor preprocessor, Path sourceFile, Path destinationDir) {
         this.controller = controller;
         this.preprocessor = preprocessor;

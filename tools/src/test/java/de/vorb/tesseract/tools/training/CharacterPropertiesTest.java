@@ -1,11 +1,11 @@
 package de.vorb.tesseract.tools.training;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class CharacterPropertiesTest {
+import org.junit.jupiter.api.Test;
+
+class CharacterPropertiesTest {
     final CharacterProperties semicolon = new CharacterProperties(false, false,
             false, false, true);
     final CharacterProperties b = new CharacterProperties(true, false, false,
@@ -22,63 +22,63 @@ public class CharacterPropertiesTest {
             true, false, false);
 
     @Test
-    public void testForByteCode() {
-        assertEquals(CharacterProperties.forByteCode((byte) 16), semicolon);
-        assertEquals(CharacterProperties.forByteCode((byte) 3), b);
-        assertEquals(CharacterProperties.forByteCode((byte) 5), W);
-        assertEquals(CharacterProperties.forByteCode((byte) 8), digit7);
-        assertEquals(CharacterProperties.forByteCode((byte) 0), equalSign);
+    void testForByteCode() {
+        assertThat(semicolon).isEqualTo(CharacterProperties.forByteCode((byte) 16));
+        assertThat(b).isEqualTo(CharacterProperties.forByteCode((byte) 3));
+        assertThat(W).isEqualTo(CharacterProperties.forByteCode((byte) 5));
+        assertThat(digit7).isEqualTo(CharacterProperties.forByteCode((byte) 8));
+        assertThat(equalSign).isEqualTo(CharacterProperties.forByteCode((byte) 0));
     }
 
     @Test
-    public void testFromHexString() {
-        assertEquals(CharacterProperties.forHexString("10"), semicolon);
-        assertEquals(CharacterProperties.forHexString("3"), b);
-        assertEquals(CharacterProperties.forHexString("5"), W);
-        assertEquals(CharacterProperties.forHexString("8"), digit7);
-        assertEquals(CharacterProperties.forHexString("0"), equalSign);
+    void testFromHexString() {
+        assertThat(semicolon).isEqualTo(CharacterProperties.forHexString("10"));
+        assertThat(b).isEqualTo(CharacterProperties.forHexString("3"));
+        assertThat(W).isEqualTo(CharacterProperties.forHexString("5"));
+        assertThat(digit7).isEqualTo(CharacterProperties.forHexString("8"));
+        assertThat(equalSign).isEqualTo(CharacterProperties.forHexString("0"));
     }
 
     @Test
-    public void testForCharacter() {
-        assertEquals(CharacterProperties.forCharacter(';'), semicolon);
-        assertEquals(CharacterProperties.forCharacter('b'), b);
-        assertEquals(CharacterProperties.forCharacter('W'), W);
-        assertEquals(CharacterProperties.forCharacter('7'), digit7);
-        assertEquals(CharacterProperties.forCharacter('='), equalSign);
+    void testForCharacter() {
+        assertThat(semicolon).isEqualTo(CharacterProperties.forCharacter(';'));
+        assertThat(b).isEqualTo(CharacterProperties.forCharacter('b'));
+        assertThat(W).isEqualTo(CharacterProperties.forCharacter('W'));
+        assertThat(digit7).isEqualTo(CharacterProperties.forCharacter('7'));
+        assertThat(equalSign).isEqualTo(CharacterProperties.forCharacter('='));
 
         // unicode characters
-        assertEquals(CharacterProperties.forCharacter('ß'), sharpS);
-        assertEquals(CharacterProperties.forCharacter('Ä'), umlautA);
+        assertThat(sharpS).isEqualTo(CharacterProperties.forCharacter('ß'));
+        assertThat(umlautA).isEqualTo(CharacterProperties.forCharacter('Ä'));
     }
 
     @Test
-    public void testToByteCode() {
-        assertEquals(semicolon.toByteCode(), (byte) 16);
-        assertEquals(b.toByteCode(), (byte) 3);
-        assertEquals(W.toByteCode(), (byte) 5);
-        assertEquals(digit7.toByteCode(), (byte) 8);
-        assertEquals(equalSign.toByteCode(), (byte) 0);
+    void testToByteCode() {
+        assertThat(semicolon.toByteCode()).isEqualTo((byte) 16);
+        assertThat(b.toByteCode()).isEqualTo((byte) 3);
+        assertThat(W.toByteCode()).isEqualTo((byte) 5);
+        assertThat(digit7.toByteCode()).isEqualTo((byte) 8);
+        assertThat(equalSign.toByteCode()).isEqualTo((byte) 0);
     }
 
     @Test
-    public void testToHexString() {
-        assertEquals(semicolon.toHexString(), "10");
-        assertEquals(b.toHexString(), "3");
-        assertEquals(W.toHexString(), "5");
-        assertEquals(digit7.toHexString(), "8");
-        assertEquals(equalSign.toHexString(), "0");
+    void testToHexString() {
+        assertThat(semicolon.toHexString()).isEqualTo("10");
+        assertThat(b.toHexString()).isEqualTo("3");
+        assertThat(W.toHexString()).isEqualTo("5");
+        assertThat(digit7.toHexString()).isEqualTo("8");
+        assertThat(equalSign.toHexString()).isEqualTo("0");
     }
 
     @Test
-    public void testEquals() {
-        assertEquals(b.equals(b), true);
-        assertEquals(b.equals(W), false);
+    void testEquals() {
+        assertThat(b.equals(b)).isTrue();
+        assertThat(b.equals(W)).isFalse();
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(b.hashCode(), b.hashCode());
-        assertNotEquals(b.hashCode(), W.hashCode());
+    void testHashCode() {
+        assertThat(b.hashCode()).isEqualTo(b.hashCode());
+        assertThat(b.hashCode()).isNotEqualTo(W.hashCode());
     }
 }

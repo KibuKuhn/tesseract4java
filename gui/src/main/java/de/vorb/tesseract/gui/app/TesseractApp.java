@@ -1,6 +1,61 @@
-package de.vorb.tesseract.gui.controller;
+package de.vorb.tesseract.gui.app;
+
+import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.prefs.Preferences;
+
+import javax.imageio.ImageIO;
+import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JTabbedPane;
+import javax.swing.JViewport;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.xml.transform.TransformerException;
 
 import com.google.common.collect.Lists;
+
+import de.vorb.tesseract.gui.event.ScaleEvent;
+import de.vorb.tesseract.gui.event.ScaleListener;
 import de.vorb.tesseract.gui.io.BoxFileReader;
 import de.vorb.tesseract.gui.io.BoxFileWriter;
 import de.vorb.tesseract.gui.io.PlainTextWriter;
@@ -55,67 +110,14 @@ import eu.digitisation.input.Parameters;
 import eu.digitisation.input.WarningException;
 import eu.digitisation.output.Report;
 
-import javax.imageio.ImageIO;
-import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JTabbedPane;
-import javax.swing.JViewport;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-import javax.xml.transform.TransformerException;
-import java.awt.Desktop;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.prefs.Preferences;
-
-public class TesseractController extends WindowAdapter implements
-        ActionListener, ListSelectionListener, Observer, ChangeListener {
+public class TesseractApp extends WindowAdapter implements
+        ActionListener, ListSelectionListener, ChangeListener, ScaleListener {
 
     public static void main(String[] args) {
         setLookAndFeel();
 
         try {
-            new TesseractController();
+            new TesseractApp();
         } catch (Throwable e) {
             Dialogs.showError(null, "Fatal error",
                     String.format("The necessary libraries could not be loaded: '%s'", e.getMessage()));
@@ -182,7 +184,7 @@ public class TesseractController extends WindowAdapter implements
 
     private Optional<RecognitionWorker> recognitionWorker = Optional.empty();
 
-    public TesseractController() {
+    public TesseractApp() {
         // create new tesseract frame
         view = new TesseractFrame();
         featureDebugger = new FeatureDebugger(view);
@@ -264,7 +266,7 @@ public class TesseractController extends WindowAdapter implements
                 (JViewport) view.getPages().getList().getParent();
         pagesViewport.addChangeListener(this);
         view.getTraineddataFiles().getList().addListSelectionListener(this);
-        view.getScale().addObserver(this);
+        view.getScale().addScaleListener(this);
 
         {
             // preprocessing pane
@@ -922,7 +924,7 @@ public class TesseractController extends WindowAdapter implements
 
                 // create SwingWorker to preprocess page
                 final PreprocessingWorker pw = new PreprocessingWorker(
-                        TesseractController.this,
+                        TesseractApp.this,
                         getPreprocessor(pt.getFile()), pt.getFile(),
                         getProjectModel().get().getPreprocessedDir());
 
@@ -1401,13 +1403,6 @@ public class TesseractController extends WindowAdapter implements
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        if (o == view.getScale()) {
-            view.getScaleLabel().setText(o.toString());
-        }
-    }
-
-    @Override
     public void valueChanged(ListSelectionEvent evt) {
         if (evt.getValueIsAdjusting()) {
             return;
@@ -1558,4 +1553,11 @@ public class TesseractController extends WindowAdapter implements
     public ApplicationMode getApplicationMode() {
         return mode;
     }
+
+	@Override
+	public void scaleChanged(ScaleEvent scaleEvent) {
+		  if (scaleEvent.getSource() == view.getScale()) {
+	            view.getScaleLabel().setText(scaleEvent.getSource().toString());
+	        }
+	}
 }

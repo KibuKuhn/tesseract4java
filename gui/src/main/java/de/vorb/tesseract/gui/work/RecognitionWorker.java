@@ -1,6 +1,6 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.controller.TesseractController;
+import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.gui.model.ImageModel;
 import de.vorb.tesseract.gui.model.PageModel;
 import de.vorb.tesseract.gui.view.dialogs.Dialogs;
@@ -17,12 +17,12 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 public class RecognitionWorker extends SwingWorker<PageModel, Void> {
-    private final TesseractController controller;
+    private final TesseractApp controller;
     private final ImageModel imageModel;
     private final String trainingFile;
     private final PageRecognitionProducer producer;
 
-    public RecognitionWorker(TesseractController controller,
+    public RecognitionWorker(TesseractApp controller,
             ImageModel imageModel, String trainingFile) {
         this.controller = controller;
         this.imageModel = imageModel;
