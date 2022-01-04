@@ -51,7 +51,7 @@ public class FileSelector extends ParameterSelector<File> {
     static final long serialVersionUID = 1L;
     static File dir; // directory opened by default
     JTextPane area;  // The area to display the filename
-    JButton choose;  // Optional file chooser
+    JButton choose;  //  file chooser
 
     public FileSelector(Parameter<File> op, Color forecolor, Color bgcolor) {
         super(op, forecolor, bgcolor);

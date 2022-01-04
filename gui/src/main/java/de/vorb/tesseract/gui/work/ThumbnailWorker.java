@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -100,8 +100,7 @@ public class ThumbnailWorker extends
                     ImageIO.write(thumb, "PNG", thumbFile.toFile());
                 }
 
-                publish(new Task(task.index, new PageThumbnail(imageFile,
-                        Optional.of(thumb))));
+                publish(new Task(task.index, new PageThumbnail(imageFile, thumb)));
             } else {
                 Thread.sleep(500L);
             }

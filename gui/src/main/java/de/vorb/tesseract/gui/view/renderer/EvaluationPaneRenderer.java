@@ -1,13 +1,14 @@
 package de.vorb.tesseract.gui.view.renderer;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.util.Objects;
+
+import javax.swing.ImageIcon;
+
 import de.vorb.tesseract.gui.model.PageModel;
 import de.vorb.tesseract.gui.model.Scale;
 import de.vorb.tesseract.gui.view.EvaluationPane;
-
-import javax.swing.ImageIcon;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 public class EvaluationPaneRenderer implements PageRenderer {
     private final EvaluationPane evaluationPane;
@@ -17,8 +18,8 @@ public class EvaluationPaneRenderer implements PageRenderer {
     }
 
     @Override
-    public void render(Optional<PageModel> pageModel, float scale) {
-        final boolean modelPresent = pageModel.isPresent();
+    public void render(PageModel pageModel, float scale) {
+        boolean modelPresent = !Objects.isNull(pageModel);
 
         evaluationPane.getSaveTranscriptionButton().setEnabled(modelPresent);
         evaluationPane.getGenerateReportButton().setEnabled(modelPresent);
@@ -26,7 +27,7 @@ public class EvaluationPaneRenderer implements PageRenderer {
 
         if (modelPresent) {
             final BufferedImage img =
-                    pageModel.get().getImageModel().getSourceImage();
+                    pageModel.getImageModel().getSourceImage();
 
             final int w = Scale.scaled(img.getWidth(), scale);
             final int h = Scale.scaled(img.getHeight(), scale);
@@ -35,7 +36,7 @@ public class EvaluationPaneRenderer implements PageRenderer {
                     new ImageIcon(img.getScaledInstance(w, h,
                             Image.SCALE_SMOOTH)));
             evaluationPane.getTextAreaTranscript().setText(
-                    pageModel.get().getTranscription());
+                    pageModel.getTranscription());
         } else {
             evaluationPane.getOriginal().setIcon(null);
             evaluationPane.getTextAreaTranscript().setText("");

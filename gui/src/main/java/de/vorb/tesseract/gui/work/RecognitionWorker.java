@@ -13,7 +13,7 @@ import javax.swing.SwingWorker;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.concurrent.ExecutionException;
 
 public class RecognitionWorker extends SwingWorker<PageModel, Void> {
@@ -34,7 +34,7 @@ public class RecognitionWorker extends SwingWorker<PageModel, Void> {
     protected PageModel doInBackground() throws Exception {
         // set the progress bar state to indeterminate
         SwingUtilities.invokeLater(() -> {
-            controller.setPageModel(Optional.empty());
+            controller.setPageModel(null);
             controller.getView().getProgressBar().setIndeterminate(true);
         });
 
@@ -67,13 +67,13 @@ public class RecognitionWorker extends SwingWorker<PageModel, Void> {
     @Override
     protected void done() {
         try {
-            controller.setPageModel(Optional.of(get()));
+            controller.setPageModel(get());
         } catch (ExecutionException e) {
             e.printStackTrace();
 
             final String message = "The image could not be recognized";
 
-            controller.setPageModel(Optional.empty());
+            controller.setPageModel(null);
 
             Dialogs.showError(controller.getView(), "Error during recognition",
                     message);

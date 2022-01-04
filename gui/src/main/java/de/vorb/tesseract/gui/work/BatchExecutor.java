@@ -37,14 +37,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BatchExecutor {
-    private final TesseractApp controller;
+    private final TesseractApp tesserApp;
     private final ProjectModel project;
     private final BatchExportModel export;
 
-    public BatchExecutor(TesseractApp controller, ProjectModel project,
+    public BatchExecutor(TesseractApp tesserApp, ProjectModel project,
             BatchExportModel export) {
 
-        this.controller = controller;
+        this.tesserApp = tesserApp;
         this.project = project;
         this.export = export;
     }
@@ -59,10 +59,10 @@ public class BatchExecutor {
         final LinkedBlockingQueue<PageRecognitionProducer> recognizers =
                 new LinkedBlockingQueue<>(numThreads);
 
-        final String trainingFile = controller.getTrainingFile().get();
+        final String trainingFile = tesserApp.getTrainingFile();
         for (int i = 0; i < numThreads; i++) {
             final PageRecognitionProducer recognizer =
-                    new PageRecognitionProducer(controller,
+                    new PageRecognitionProducer(tesserApp,
                             TraineddataFiles.getTessdataDir(),
                             trainingFile);
             recognizer.init();
@@ -85,15 +85,15 @@ public class BatchExecutor {
         final AtomicInteger errors = new AtomicInteger(0);
 
         // prepare reports
-        final Path equivalencesFile = controller.prepareReports();
+        final Path equivalencesFile = tesserApp.prepareReports();
 
         // create tasks and submit them
         for (final Path sourceFile : project.getImageFiles()) {
             final Preprocessor preprocessor =
-                    controller.getPreprocessor(sourceFile);
+                    tesserApp.getPreprocessor(sourceFile);
 
             final boolean hasPreprocessorChanged =
-                    controller.hasPreprocessorChanged(sourceFile);
+                    tesserApp.hasPreprocessorChanged(sourceFile);
 
             final OCRTask task = new OCRTask(sourceFile,
                     project, export, preprocessor, recognizers,
@@ -219,7 +219,7 @@ public class BatchExecutor {
                                 project.getOCRDir());
 
                         final Parameters params = new Parameters();
-                        final Path eqFile = controller.prepareReports();
+                        final Path eqFile = tesserApp.prepareReports();
                         params.eqfile.setValue(eqFile.toFile());
 
                         final Report report = new Report(batch, params);
@@ -264,12 +264,12 @@ public class BatchExecutor {
                 // show errors or success dialog
                 SwingUtilities.invokeLater(() -> {
                     if (errors.get() == 0) {
-                        Dialogs.showInfo(controller.getView(),
+                        Dialogs.showInfo(tesserApp.getView(),
                                 "Export completed",
                                 "The batch export finished without any errors.");
                     } else {
                         final boolean investigate = Dialogs.ask(
-                                controller.getView(),
+                                tesserApp.getView(),
                                 "Errors during export",
                                 String.format(
                                         "The batch export finished, but there have been %d errors. Do you want to"
@@ -282,7 +282,7 @@ public class BatchExecutor {
                                         export.getDestinationDir().resolve(
                                                 "errors.log").toFile());
                             } catch (IOException e) {
-                                Dialogs.showError(controller.getView(),
+                                Dialogs.showError(tesserApp.getView(),
                                         "Error",
                                         "Could not open the error log.");
                             }

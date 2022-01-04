@@ -24,7 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Optional;
+
 
 public class EvaluationPane extends JPanel implements PageModelComponent {
     private static final long serialVersionUID = 1L;
@@ -34,7 +34,7 @@ public class EvaluationPane extends JPanel implements PageModelComponent {
     private final Scale scale;
     private final EvaluationPaneRenderer renderer;
 
-    private Optional<PageModel> model;
+    private PageModel model;
     private final JLabel lblOriginal;
     private final JTextArea textAreaTranscript;
     private final JButton btnSaveTranscription;
@@ -212,14 +212,14 @@ public class EvaluationPane extends JPanel implements PageModelComponent {
     }
 
     @Override
-    public void setPageModel(Optional<PageModel> model) {
+    public void setPageModel(PageModel model) {
         this.model = model;
 
         renderer.render(model, scale.current());
     }
 
     @Override
-    public Optional<PageModel> getPageModel() {
+    public PageModel getPageModel() {
         return model;
     }
 
@@ -229,12 +229,8 @@ public class EvaluationPane extends JPanel implements PageModelComponent {
     }
 
     @Override
-    public Optional<BoxFileModel> getBoxFileModel() {
-        if (model.isPresent()) {
-            return Optional.of(model.get().toBoxFileModel());
-        } else {
-            return Optional.empty();
-        }
+    public BoxFileModel getBoxFileModel() {
+    	return model == null ? null : model.toBoxFileModel();
     }
 
     public void setEditorFont(String editorFont) {

@@ -20,7 +20,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Line2D.Double;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+
 
 public class FeatureDebugger extends JDialog {
     private static final long serialVersionUID = 1L;
@@ -36,7 +37,7 @@ public class FeatureDebugger extends JDialog {
     private final JLabel lblCanvas;
 
     private List<Feature3D> features;
-    private Optional<IntTemplates> prototypes = Optional.empty();
+    private IntTemplates prototypes;
 
     /**
      * Create the dialog.
@@ -68,7 +69,7 @@ public class FeatureDebugger extends JDialog {
         redraw();
     }
 
-    public void setPrototypes(Optional<IntTemplates> prototypes) {
+    public void setPrototypes(IntTemplates prototypes) {
         this.prototypes = prototypes;
     }
 
@@ -81,8 +82,8 @@ public class FeatureDebugger extends JDialog {
         g2d.clearRect(0, 0, WIDTH, HEIGHT);
 
         final Double line = new Line2D.Double(0d, 0d, 0d, 0d);
-        if (prototypes.isPresent()) {
-            final List<IntClass> classes = prototypes.get().getClasses();
+        if (Objects.nonNull(prototypes)) {
+            final List<IntClass> classes = prototypes.getClasses();
             for (final Feature4D feat : classes.get(0).getProtoSets().get(0).getProtos()) {
                 // transform the angle back to radians
                 final double angle = feat.getAngle() / 256d * PI2;

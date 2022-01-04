@@ -8,7 +8,7 @@ import javax.swing.SwingWorker;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
+
 
 public class PageListWorker extends SwingWorker<Void, PageThumbnail> {
     private final ProjectModel projectModel;
@@ -25,7 +25,7 @@ public class PageListWorker extends SwingWorker<Void, PageThumbnail> {
     @Override
     protected Void doInBackground() throws Exception {
         // no thumbnail
-        final Optional<BufferedImage> thumbnail = Optional.empty();
+        BufferedImage thumbnail = null;
 
         // publish a placeholder (no thumbnail) for every image file
         for (final Path file : projectModel.getImageFiles()) {

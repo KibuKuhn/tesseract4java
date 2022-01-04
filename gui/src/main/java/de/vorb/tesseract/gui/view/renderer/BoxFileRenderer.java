@@ -13,7 +13,7 @@ import javax.swing.ListModel;
 import javax.swing.SwingWorker;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -28,8 +28,8 @@ public class BoxFileRenderer {
         this.boxEditor = boxEditor;
     }
 
-    public void render(final Optional<BoxFileModel> model, final float scale) {
-        if (!model.isPresent()) {
+    public void render(final BoxFileModel model, final float scale) {
+        if (Objects.isNull(model)) {
             // remove image, if no page model is given and free resources
             final Icon icon = boxEditor.getCanvas().getIcon();
             if (icon != null && icon instanceof ImageIcon) {
@@ -45,7 +45,7 @@ public class BoxFileRenderer {
 
         // TODO add a version of render() that takes two rectangles and a new
         // box and updates the necessary area only
-        final BufferedImage image = model.get().getImage();
+        final BufferedImage image = model.getImage();
 
         // calculate image dimensions
         final int w = image.getWidth();

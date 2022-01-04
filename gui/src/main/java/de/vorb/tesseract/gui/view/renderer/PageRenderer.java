@@ -2,8 +2,6 @@ package de.vorb.tesseract.gui.view.renderer;
 
 import de.vorb.tesseract.gui.model.PageModel;
 
-import java.util.Optional;
-
 /**
  * Page renderer.
  *
@@ -17,5 +15,5 @@ public interface PageRenderer {
      * @param pageModel page model to render
      * @param scale     scaling factor
      */
-    void render(final Optional<PageModel> pageModel, final float scale);
+    void render(PageModel pageModel, final float scale);
 }

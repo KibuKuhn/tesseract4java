@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
+import java.util.Objects;
 
 public class PageListCellRenderer extends JLabel implements
         ListCellRenderer<PageThumbnail> {
@@ -54,10 +54,10 @@ public class PageListCellRenderer extends JLabel implements
             setForeground(Color.BLACK);
         }
 
-        final Optional<BufferedImage> opt = value.getThumbnail();
+        final BufferedImage opt = value.getThumbnail();
 
-        if (opt.isPresent()) {
-            final BufferedImage thumbnail = opt.get();
+        if (Objects.nonNull(opt)) {
+            final BufferedImage thumbnail = opt;
             final Graphics2D g2d = (Graphics2D) thumbnail.getGraphics();
 
             // set color

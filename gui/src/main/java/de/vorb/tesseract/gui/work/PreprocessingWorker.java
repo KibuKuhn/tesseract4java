@@ -10,7 +10,7 @@ import javax.swing.SwingWorker;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
+
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -46,7 +46,7 @@ public class PreprocessingWorker extends SwingWorker<ImageModel, Void> {
     @Override
     protected void done() {
         try {
-            controller.setImageModel(Optional.of(get()));
+            controller.setImageModel(get());
         } catch (InterruptedException | ExecutionException
                 | CancellationException e) {
         } finally {

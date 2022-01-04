@@ -1,5 +1,19 @@
 package de.vorb.tesseract.gui.view.renderer;
 
+import static de.vorb.tesseract.gui.model.Scale.scaled;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.ImageIcon;
+import javax.swing.SwingWorker;
+
 import de.vorb.tesseract.gui.model.PageModel;
 import de.vorb.tesseract.gui.view.Colors;
 import de.vorb.tesseract.gui.view.RecognitionPane;
@@ -13,19 +27,6 @@ import de.vorb.tesseract.util.Paragraph;
 import de.vorb.tesseract.util.Symbol;
 import de.vorb.tesseract.util.Word;
 
-import javax.swing.ImageIcon;
-import javax.swing.SwingWorker;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static de.vorb.tesseract.gui.model.Scale.scaled;
-
 public class RecognitionRenderer implements PageRenderer {
 
     private static final int DEFAULT_FONT_SIZE = 12;
@@ -35,10 +36,10 @@ public class RecognitionRenderer implements PageRenderer {
     private final RecognitionPane recognitionPane;
     private SwingWorker<Void, Void> renderWorker;
 
-    private PageModel lastPageModel = null;
-    private BufferedImage original = null;
-    private BufferedImage recognition = null;
-    private float minimumConfidence = 0;
+    private PageModel lastPageModel;
+    private BufferedImage original;
+    private BufferedImage recognition;
+    private float minimumConfidence;
     private float lastScale;
 
     private final AtomicReference<Font> fontNormal = new AtomicReference<>();
@@ -66,14 +67,14 @@ public class RecognitionRenderer implements PageRenderer {
     }
 
     @Override
-    public void render(Optional<PageModel> pageModel, final float scale) {
+    public void render(PageModel pageModel, float scale) {
         if (renderWorker != null && !renderWorker.isCancelled()
                 && !renderWorker.isDone()) {
             renderWorker.cancel(true);
         }
 
         // if no page model is present, remove the images and render worker
-        if (!pageModel.isPresent()) {
+        if (Objects.isNull(pageModel)) {
             renderWorker = null;
 
             recognitionPane.getCanvasOriginal().setIcon(null);
@@ -85,18 +86,18 @@ public class RecognitionRenderer implements PageRenderer {
             return;
         }
 
-        final Page page = pageModel.get().getPage();
+        final Page page = pageModel.getPage();
         final BufferedImage preprocessed =
-                pageModel.get().getImageModel().getPreprocessedImage();
+                pageModel.getImageModel().getPreprocessedImage();
         final int width = preprocessed.getWidth();
         final int height = preprocessed.getHeight();
 
         final int scaledWidth;
         final int scaledHeight;
-        if (lastPageModel != pageModel.get() || lastScale != scale) {
+        if (lastPageModel != pageModel || lastScale != scale) {
             // prepare the images if the model has changed
 
-            lastPageModel = pageModel.get();
+            lastPageModel = pageModel;
             lastScale = scale;
 
             // calculate the width and height of the scene

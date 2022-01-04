@@ -37,7 +37,7 @@ import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+
 
 public class PreprocessingPane extends JPanel implements ImageModelComponent {
     private static final long serialVersionUID = 1L;
@@ -54,7 +54,7 @@ public class PreprocessingPane extends JPanel implements ImageModelComponent {
     private final JButton btnApplyToPage;
     private final JButton btnApplyToAllPages;
 
-    private Optional<ImageModel> imageModel = Optional.empty();
+    private ImageModel imageModel;
 
     /**
      * Create the panel.
@@ -303,18 +303,13 @@ public class PreprocessingPane extends JPanel implements ImageModelComponent {
     }
 
     @Override
-    public void setImageModel(Optional<ImageModel> model) {
+    public void setImageModel(ImageModel model) {
         imageModel = model;
-
-        if (model.isPresent()) {
-            lblPreview.setIcon(new ImageIcon(model.get().getPreprocessedImage()));
-        } else {
-            lblPreview.setIcon(null);
-        }
+        lblPreview.setIcon(imageModel == null ? null : new ImageIcon(imageModel.getPreprocessedImage()));
     }
 
     @Override
-    public Optional<ImageModel> getImageModel() {
+    public ImageModel getImageModel() {
         return imageModel;
     }
 

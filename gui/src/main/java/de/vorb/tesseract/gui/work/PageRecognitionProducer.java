@@ -1,9 +1,19 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.app.TesseractApp;
-import de.vorb.tesseract.tools.recognition.RecognitionProducer;
-import de.vorb.tesseract.util.feat.Feature3D;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
 
+import javax.annotation.CheckForNull;
 import javax.imageio.ImageIO;
 
 import org.bytedeco.javacpp.BytePointer;
@@ -14,23 +24,14 @@ import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
 import org.bytedeco.tesseract.TBLOB;
 import org.bytedeco.tesseract.global.tesseract;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
+import de.vorb.tesseract.gui.app.TesseractApp;
+import de.vorb.tesseract.tools.recognition.RecognitionProducer;
+import de.vorb.tesseract.util.feat.Feature3D;
+
 
 public class PageRecognitionProducer extends RecognitionProducer {
     private final Path tessdataDir;
-    private Optional<PIX> lastPix = Optional.empty();
+    private PIX lastPix;
 
     private final TesseractApp controller;
     private final HashMap<String, String> variables = new HashMap<>();
@@ -91,29 +92,31 @@ public class PageRecognitionProducer extends RecognitionProducer {
     }
 
     public void loadImage(Path imageFile) {
-        if (lastPix.isPresent()) {
+        if (Objects.nonNull(lastPix)) {
             // destroy old pix
-            lept.pixDestroy(lastPix.get());
+            lept.pixDestroy(lastPix);
         }
 
         final PIX pix = lept.pixRead(imageFile.toString());
 
         tesseract.TessBaseAPISetImage2(getHandle(), pix);
 
-        lastPix = Optional.of(pix);
+        lastPix = pix;
     }
 
-    public Optional<PIX> getImage() {
+    @CheckForNull
+    public PIX getImage() {
         return lastPix;
     }
 
-    public Optional<PIX> getThresholdedImage() {
-        return Optional.ofNullable(tesseract.TessBaseAPIGetThresholdedImage(getHandle()));
+    @CheckForNull
+    public PIX getThresholdedImage() {
+        return tesseract.TessBaseAPIGetThresholdedImage(getHandle());
     }
 
     public List<Feature3D> getFeaturesForSymbol(BufferedImage symbol) {
-        if (!lastPix.isPresent()) {
-            return new LinkedList<>();
+        if (Objects.isNull(lastPix)) {
+            return Collections.emptyList();
         }
 
         final int padding = 5;
@@ -132,17 +135,17 @@ public class PageRecognitionProducer extends RecognitionProducer {
         g2d.dispose();
 
         // FIXME
-        if (!controller.getProjectModel().isPresent()) {
+        if (Objects.isNull(controller.getProjectModel())) {
             return Collections.emptyList();
         }
 
-        final String symbolFile = controller.getProjectModel().get().getProjectDir().resolve(
+        final String symbolFile = controller.getProjectModel().getProjectDir().resolve(
                 "symbol.png").toString();
         try {
             ImageIO.write(symbolWithPadding, "PNG", new File(symbolFile));
         } catch (IOException e) {
             e.printStackTrace();
-            return new LinkedList<>();
+            return Collections.emptyList();
         }
 
         try (final PIX pixSymbol = lept.pixRead(symbolFile);
