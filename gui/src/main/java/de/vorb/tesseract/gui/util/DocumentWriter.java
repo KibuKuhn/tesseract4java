@@ -1,5 +1,7 @@
 package de.vorb.tesseract.gui.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -19,9 +21,10 @@ import java.nio.file.Path;
 
 public final class DocumentWriter {
 
-    private DocumentWriter() {}
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentWriter.class);
+	
     private static Transformer transformer;
+    private DocumentWriter() {}
 
     static {
         try {
@@ -32,7 +35,7 @@ public final class DocumentWriter {
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         } catch (TransformerConfigurationException
                 | TransformerFactoryConfigurationError e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

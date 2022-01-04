@@ -52,6 +52,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.xml.transform.TransformerException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 
 import de.vorb.tesseract.gui.event.ScaleEvent;
@@ -112,8 +115,13 @@ import eu.digitisation.output.Report;
 
 public class TesseractApp extends WindowAdapter
 		implements ActionListener, ListSelectionListener, ChangeListener, ScaleListener {
+	
+	static {
+		initLogging();
+	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractApp.class);
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		setLookAndFeel();
 
 		try {
@@ -126,9 +134,16 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
+	private static void initLogging() {
+		System.setProperty("logDir", System.getProperty("user.dir"));
+		System.setProperty("logFile", "tesseract4java.log");
+		System.setProperty("logLevel", "INFO");		
+	}
+
 	private static void setLookAndFeel() {
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			String laf = System.getProperty("laf", UIManager.getSystemLookAndFeelClassName());
+			UIManager.setLookAndFeel(laf);
 		} catch (Exception e1) {
 			// fail silently
 			try {
@@ -232,7 +247,7 @@ public class TesseractApp extends WindowAdapter
 			pageRecognitionProducer.setPageSegmentationMode(getPageSegmentationMode());
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 
 		// register listeners
@@ -536,7 +551,7 @@ public class TesseractApp extends WindowAdapter
 
                 }
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -588,7 +603,7 @@ public class TesseractApp extends WindowAdapter
 				Desktop.getDesktop().open(report.toFile());
 			}
 		} catch (WarningException | IOException | TransformerException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 
@@ -1029,7 +1044,7 @@ public class TesseractApp extends WindowAdapter
 			// final <IntTemplates> prototypes = loadPrototypes();
 			// featureDebugger.setPrototypes(prototypes);
 			// } catch (IOException e) {
-			// e.printStackTrace();
+			// LOGGER.error(e.getMessage(), e);
 			// }
 
 			// if the traineddata file has changed, ask to reload the page
@@ -1259,7 +1274,7 @@ public class TesseractApp extends WindowAdapter
 					model = model.withTranscription(transcription);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 

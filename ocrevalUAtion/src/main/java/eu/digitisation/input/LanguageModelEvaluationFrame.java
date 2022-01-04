@@ -24,11 +24,14 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LanguageModelEvaluationFrame extends JFrame {
 
-    /**
-     *     */
-    private static final long serialVersionUID = 4895806099667768081L;
+    private static final long serialVersionUID = 1L;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(LanguageModelEvaluationFrame.class);
 
     private JPanel contentPane;
     private JTextField thresholdTextField;
@@ -230,7 +233,7 @@ public class LanguageModelEvaluationFrame extends JFrame {
                     frame.setVisible(true);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         });

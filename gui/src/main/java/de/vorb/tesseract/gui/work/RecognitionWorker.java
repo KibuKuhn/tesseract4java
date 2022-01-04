@@ -10,6 +10,10 @@ import de.vorb.tesseract.util.Page;
 
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class RecognitionWorker extends SwingWorker<PageModel, Void> {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(RecognitionWorker.class);
+	
     private final TesseractApp controller;
     private final ImageModel imageModel;
     private final String trainingFile;
@@ -69,7 +76,7 @@ public class RecognitionWorker extends SwingWorker<PageModel, Void> {
         try {
             controller.setPageModel(get());
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
 
             final String message = "The image could not be recognized";
 
@@ -79,7 +86,7 @@ public class RecognitionWorker extends SwingWorker<PageModel, Void> {
                     message);
         } catch (InterruptedException e) {
             // unexpected: if it is thrown, it is a bug
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
 
             Dialogs.showError(controller.getView(), "Error during recognition",
                     "The recognition process has been interrupted unexpectedly.");

@@ -23,6 +23,8 @@ import org.bytedeco.leptonica.global.lept;
 import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
 import org.bytedeco.tesseract.TBLOB;
 import org.bytedeco.tesseract.global.tesseract;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.vorb.tesseract.gui.app.TesseractApp;
 import de.vorb.tesseract.tools.recognition.RecognitionProducer;
@@ -30,6 +32,9 @@ import de.vorb.tesseract.util.feat.Feature3D;
 
 
 public class PageRecognitionProducer extends RecognitionProducer {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(PageRecognitionProducer.class);
+	
     private final Path tessdataDir;
     private PIX lastPix;
 
@@ -144,7 +149,7 @@ public class PageRecognitionProducer extends RecognitionProducer {
         try {
             ImageIO.write(symbolWithPadding, "PNG", new File(symbolFile));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return Collections.emptyList();
         }
 

@@ -25,12 +25,14 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-public class EvaluationFrame extends JFrame {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 4895806099667768081L;
+public class EvaluationFrame extends JFrame {
+   
+    private static final long serialVersionUID = 1L;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvaluationFrame.class);
 
     private JPanel contentPane;
     private JTextField thresholdTextField;
@@ -233,9 +235,9 @@ public class EvaluationFrame extends JFrame {
                     frame.setVisible(true);
 
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         });

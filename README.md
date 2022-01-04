@@ -14,6 +14,15 @@ by Paul Vorbach (German).
 ## Usage
 Basic usage is documented on [our wiki page](https://github.com/tesseract4java/tesseract4java/wiki/Usage)
 
+### Different Look & Feel
+To apply a different Look & Feel, for the time being set Property "laf=the-look-and-feel-classname"
+For example Linux provides theese Look an Feel names
+* javax.swing.plaf.metal.MetalLookAndFeel
+* javax.swing.plaf.nimbus.NimbusLookAndFeel
+* com.sun.java.swing.plaf.motif.MotifLookAndFeel
+* com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+ 
+
 ## Download
 
 Binary distributions and release notes are available in the [releases section].
