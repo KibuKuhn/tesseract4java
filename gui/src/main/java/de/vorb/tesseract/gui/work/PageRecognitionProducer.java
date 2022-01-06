@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.annotation.CheckForNull;
 import javax.imageio.ImageIO;
 
 import org.bytedeco.javacpp.BytePointer;
@@ -23,10 +22,11 @@ import org.bytedeco.leptonica.global.lept;
 import org.bytedeco.tesseract.INT_FEATURE_STRUCT;
 import org.bytedeco.tesseract.TBLOB;
 import org.bytedeco.tesseract.global.tesseract;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.vorb.tesseract.gui.app.TesseractApp;
+import de.vorb.tesseract.gui.app.ITesseractApp;
 import de.vorb.tesseract.tools.recognition.RecognitionProducer;
 import de.vorb.tesseract.util.feat.Feature3D;
 
@@ -38,11 +38,11 @@ public class PageRecognitionProducer extends RecognitionProducer {
     private final Path tessdataDir;
     private PIX lastPix;
 
-    private final TesseractApp controller;
+    private final ITesseractApp controller;
     private final HashMap<String, String> variables = new HashMap<>();
     private int pageSegmentationMode = tesseract.PSM_AUTO;
 
-    public PageRecognitionProducer(TesseractApp controller,
+    public PageRecognitionProducer(ITesseractApp controller,
             Path tessdataDir, String trainingFile) {
         super(trainingFile);
 
@@ -109,12 +109,12 @@ public class PageRecognitionProducer extends RecognitionProducer {
         lastPix = pix;
     }
 
-    @CheckForNull
+    
     public PIX getImage() {
         return lastPix;
     }
 
-    @CheckForNull
+    @Nullable
     public PIX getThresholdedImage() {
         return tesseract.TessBaseAPIGetThresholdedImage(getHandle());
     }

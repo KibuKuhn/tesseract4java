@@ -31,7 +31,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import de.vorb.tesseract.gui.app.TesseractApp;
+import de.vorb.tesseract.gui.app.ITesseractApp;
 import de.vorb.tesseract.gui.model.BatchExportModel;
 
 public class BatchExportDialog extends JDialog implements ActionListener {
@@ -54,7 +54,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 	private final JButton btnCancel;
 	private final JCheckBox chckbxOpenDestination;
 
-	private final TesseractApp controller;
+	private final ITesseractApp app;
 
 	private BatchExportModel exportModel = null;
 	private JCheckBox chckbxExportImages;
@@ -65,11 +65,11 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 	/**
 	 * Create the panel.
 	 */
-	public BatchExportDialog(TesseractApp controller) {
+	public BatchExportDialog(ITesseractApp app) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(BatchExportDialog.class.getResource("/icons/book_next.png")));
-		setLocationRelativeTo(controller.getView());
+		setLocationRelativeTo(app.getView());
 
-		this.controller = controller;
+		this.app = app;
 
 		setResizable(false);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -233,7 +233,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 		setMinimumSize(getSize());
 		setSize(new Dimension(276, 280));
 
-		setLocationRelativeTo(controller.getView());
+		setLocationRelativeTo(app.getView());
 	}
 
 	public JButton getExportButton() {
@@ -256,8 +256,8 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 		return tfDestinationDir;
 	}
 
-	public static BatchExportModel showBatchExportDialog(TesseractApp controller) {
-		final BatchExportDialog dialog = new BatchExportDialog(controller);
+	public static BatchExportModel showBatchExportDialog(ITesseractApp app) {
+		final BatchExportDialog dialog = new BatchExportDialog(app);
 		dialog.setVisible(true);
 
 		return dialog.exportModel;
@@ -269,10 +269,10 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 			this.dispose();
 		} else if (evt.getSource() == btnDestinationDir) {
 			final JFileChooser dirChooser = new JFileChooser(
-					controller.getProjectModel().getProjectDir().toFile());
+					app.getProjectModel().getProjectDir().toFile());
 			dirChooser.setDialogTitle("Choose Destination Directory");
 			dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			final int result = dirChooser.showOpenDialog(controller.getView());
+			final int result = dirChooser.showOpenDialog(app.getView());
 			if (result == JFileChooser.APPROVE_OPTION) {
 				final File destinationDir = dirChooser.getSelectedFile();
 				tfDestinationDir.setText(destinationDir.toString());

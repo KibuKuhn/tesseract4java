@@ -8,8 +8,6 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +16,6 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,23 +23,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.prefs.Preferences;
 
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
-import javax.swing.JTabbedPane;
 import javax.swing.JViewport;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -55,15 +46,10 @@ import javax.xml.transform.TransformerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 import de.vorb.tesseract.gui.event.ScaleEvent;
 import de.vorb.tesseract.gui.event.ScaleListener;
-import de.vorb.tesseract.gui.io.BoxFileReader;
-import de.vorb.tesseract.gui.io.BoxFileWriter;
 import de.vorb.tesseract.gui.io.PlainTextWriter;
 import de.vorb.tesseract.gui.model.ApplicationMode;
-import de.vorb.tesseract.gui.model.BatchExportModel;
 import de.vorb.tesseract.gui.model.BoxFileModel;
 import de.vorb.tesseract.gui.model.FilteredListModel;
 import de.vorb.tesseract.gui.model.ImageModel;
@@ -84,16 +70,8 @@ import de.vorb.tesseract.gui.view.PageModelComponent;
 import de.vorb.tesseract.gui.view.PreprocessingPane;
 import de.vorb.tesseract.gui.view.SymbolOverview;
 import de.vorb.tesseract.gui.view.TesseractFrame;
-import de.vorb.tesseract.gui.view.dialogs.BatchExportDialog;
-import de.vorb.tesseract.gui.view.dialogs.CharacterHistogram;
 import de.vorb.tesseract.gui.view.dialogs.Dialogs;
-import de.vorb.tesseract.gui.view.dialogs.ImportTranscriptionDialog;
-import de.vorb.tesseract.gui.view.dialogs.NewProjectDialog;
 import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog;
-import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog.ResultState;
-import de.vorb.tesseract.gui.view.dialogs.UnicharsetDebugger;
-import de.vorb.tesseract.gui.work.BatchExecutor;
-import de.vorb.tesseract.gui.work.PageListWorker;
 import de.vorb.tesseract.gui.work.PageRecognitionProducer;
 import de.vorb.tesseract.gui.work.PreprocessingWorker;
 import de.vorb.tesseract.gui.work.RecognitionWorker;
@@ -102,7 +80,6 @@ import de.vorb.tesseract.gui.work.ThumbnailWorker.Task;
 import de.vorb.tesseract.tools.preprocessing.DefaultPreprocessor;
 import de.vorb.tesseract.tools.preprocessing.Preprocessor;
 import de.vorb.tesseract.tools.recognition.RecognitionProducer;
-import de.vorb.tesseract.tools.training.Unicharset;
 import de.vorb.tesseract.util.Box;
 import de.vorb.tesseract.util.Symbol;
 import de.vorb.tesseract.util.TraineddataFiles;
@@ -114,18 +91,23 @@ import eu.digitisation.input.WarningException;
 import eu.digitisation.output.Report;
 
 public class TesseractApp extends WindowAdapter
-		implements ActionListener, ListSelectionListener, ChangeListener, ScaleListener {
+		implements ListSelectionListener, ChangeListener, ScaleListener, ActionListener, ITesseractApp {
 	
 	static {
 		initLogging();
 	}
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractApp.class);
+	private static TesseractApp tesseractApp;
+	
+	public static TesseractApp get() {
+		return tesseractApp;
+	}
 
 	public static void main(String[] args) {		
 		setLookAndFeel();
 
 		try {
-			new TesseractApp();
+			tesseractApp = new TesseractApp();
 		} catch (Throwable e) {
 			Dialogs.showError(null, "Fatal error",
 					String.format("The necessary libraries could not be loaded: '%s'", e.getMessage()));
@@ -159,7 +141,6 @@ public class TesseractApp extends WindowAdapter
 
 	// constants
 	private static final String KEY_TRAINING_FILE = "training_file";
-	private static final String KEY_BOX_FILE = "box_file";
 
 	public static final Preprocessor DEFAULT_PREPROCESSOR = new DefaultPreprocessor();
 
@@ -198,6 +179,7 @@ public class TesseractApp extends WindowAdapter
 	private Set<Path> changedPreprocessors = new HashSet<>();
 
 	private RecognitionWorker recognitionWorker;
+	private MenuHandler menuHandler;
 
 	public TesseractApp() {
 		view = new TesseractFrame();
@@ -254,24 +236,9 @@ public class TesseractApp extends WindowAdapter
 		view.addWindowListener(this);
 		view.getMainTabs().addChangeListener(this);
 
-		{
-			// menu
-			view.getMenuItemExit().addActionListener(this);
-			view.getMenuItemNewProject().addActionListener(this);
-			// view.getMenuItemOpenProject().addActionListener(this);
-			view.getMenuItemOpenBoxFile().addActionListener(this);
-			// view.getMenuItemSaveProject().addActionListener(this);
-			view.getMenuItemSaveBoxFile().addActionListener(this);
-			// view.getMenuItemSavePage().addActionListener(this);
-			view.getMenuItemCloseProject().addActionListener(this);
-			view.getMenuItemOpenProjectDirectory().addActionListener(this);
-			view.getMenuItemImportTranscriptions().addActionListener(this);
-			view.getMenuItemBatchExport().addActionListener(this);
-			view.getMenuItemPreferences().addActionListener(this);
-			view.getMenuItemCharacterHistogram().addActionListener(this);
-			view.getMenuItemInspectUnicharset().addActionListener(this);
-			view.getMenuItemTesseractTrainer().addActionListener(this);
-		}
+		// menu
+		menuHandler = new MenuHandler();
+			
 
 		view.getPages().getList().addListSelectionListener(this);
 		final JViewport pagesViewport = (JViewport) view.getPages().getList().getParent();
@@ -308,6 +275,7 @@ public class TesseractApp extends WindowAdapter
 
 		view.setVisible(true);
 	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
@@ -316,35 +284,35 @@ public class TesseractApp extends WindowAdapter
 		final PreprocessingPane preprocessingPane = view.getPreprocessingPane();
 		final EvaluationPane evalPane = view.getEvaluationPane();
 
-		if (source.equals(view.getMenuItemExit())) {
-			handleExit();
-		} else if (source.equals(view.getMenuItemNewProject())) {
-			handleNewProject();
-			// } else if (source.equals(view.getMenuItemOpenProject())) {
-			// handleOpenProject();
-		} else if (source.equals(view.getMenuItemOpenBoxFile())) {
-			handleOpenBoxFile();
-			// } else if (source.equals(view.getMenuItemSaveProject())) {
-			// handleSaveProject();
-		} else if (source.equals(view.getMenuItemSaveBoxFile())) {
-			handleSaveBoxFile();
-		} else if (source.equals(view.getMenuItemCloseProject())) {
-			handleCloseProject();
-		} else if (source.equals(view.getMenuItemOpenProjectDirectory())) {
-			handleOpenProjectDirectory();
-		} else if (source.equals(view.getMenuItemImportTranscriptions())) {
-			handleImportTranscriptions();
-		} else if (source.equals(view.getMenuItemBatchExport())) {
-			handleBatchExport();
-		} else if (source.equals(view.getMenuItemPreferences())) {
-			handlePreferences();
-		} else if (source.equals(view.getMenuItemCharacterHistogram())) {
-			handleCharacterHistogram();
-		} else if (source.equals(view.getMenuItemInspectUnicharset())) {
-			handleInspectUnicharset();
-		} else if (source.equals(view.getMenuItemTesseractTrainer())) {
-			handleTesseractTrainer();
-		} else if (preprocessingPane.getPreviewButton().equals(source)) {
+//		if (source.equals(view.getMenuItemExit())) {
+//			handleExit();
+//		} else if (source.equals(view.getMenuItemNewProject())) {
+//			handleNewProject();
+//			// } else if (source.equals(view.getMenuItemOpenProject())) {
+//			// handleOpenProject();
+//		} else if (source.equals(view.getMenuItemOpenBoxFile())) {
+//			handleOpenBoxFile();
+//			// } else if (source.equals(view.getMenuItemSaveProject())) {
+//			// handleSaveProject();
+//		} else if (source.equals(view.getMenuItemSaveBoxFile())) {
+//			handleSaveBoxFile();
+//		} else if (source.equals(view.getMenuItemCloseProject())) {
+//			handleCloseProject();
+//		} else if (source.equals(view.getMenuItemOpenProjectDirectory())) {
+//			handleOpenProjectDirectory();
+//		} else if (source.equals(view.getMenuItemImportTranscriptions())) {
+//			handleImportTranscriptions();
+//		} else if (source.equals(view.getMenuItemBatchExport())) {
+//			handleBatchExport();
+//		} else if (source.equals(view.getMenuItemPreferences())) {
+//			handlePreferences();
+//		} else if (source.equals(view.getMenuItemCharacterHistogram())) {
+//			handleCharacterHistogram();
+//		} else if (source.equals(view.getMenuItemInspectUnicharset())) {
+//			handleInspectUnicharset();
+//		} else if (source.equals(view.getMenuItemTesseractTrainer())) {
+//			handleTesseractTrainer();
+		if (preprocessingPane.getPreviewButton().equals(source)) {
 			handlePreprocessorPreview();
 		} else if (preprocessingPane.getApplyPageButton().equals(source)) {
 			handlePreprocessorChange(false);
@@ -367,6 +335,7 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
+	@Override
 	public PageModel getPageModel() {
 		final MainComponent active = view.getActiveComponent();
 
@@ -381,6 +350,7 @@ public class TesseractApp extends WindowAdapter
 		return pageRecognitionProducer;
 	}
 
+	@Override
 	public ProjectModel getProjectModel() {
 		return projectModel;
 	}
@@ -448,16 +418,6 @@ public class TesseractApp extends WindowAdapter
 		activeComponent = active;
 	}
 
-	private void handleOpenProjectDirectory() {
-		if (Desktop.isDesktopSupported()) {
-			try {
-				Desktop.getDesktop().browse(projectModel.getProjectDir().toUri());
-			} catch (IOException e) {
-				Dialogs.showError(view, "Exception", "Project directory could not be opened.");
-			}
-		}
-	}
-
 	private void handleUseOCRResult() {
 		if (Objects.nonNull(getPageModel())) {
 			final StringWriter ocrResult = new StringWriter();
@@ -470,91 +430,6 @@ public class TesseractApp extends WindowAdapter
 			}
 		}
 	}
-
-	private void handleImportTranscriptions() {
-		final ImportTranscriptionDialog importDialog = new ImportTranscriptionDialog();
-		importDialog.setVisible(true);
-
-		if (importDialog.isApproved() && Objects.nonNull(projectModel)) {
-			final Path file = importDialog.getTranscriptionFile();
-			final String sep = importDialog.getPageSeparator();
-
-			try {
-				Files.createDirectories(projectModel.getTranscriptionDir());
-
-				view.getProgressBar().setIndeterminate(true);
-
-				try (final BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-
-					// for every file
-					for (final Path imgFile : projectModel.getImageFiles()) {
-						final Path filename = FileNames.replaceExtension(imgFile, "txt").getFileName();
-						final Path transcription = projectModel.getTranscriptionDir().resolve(filename);
-
-						final BufferedWriter writer = Files.newBufferedWriter(transcription, StandardCharsets.UTF_8);
-
-						int lines = 0;
-
-						// read file line by line
-						String line;
-						while ((line = reader.readLine()) != null) {
-							// if the line equals the separator, create the next
-							// file
-							if (line.equals(sep)) {
-								break;
-							}
-
-							lines++;
-							// otherwise write the line to the current file
-							writer.write(line);
-							writer.write('\n');
-						}
-
-						// if a transcription file is empty, delete it
-						if (lines == 0) {
-							Files.delete(transcription);
-						}
-
-						writer.write('\n');
-						writer.close();
-					}
-
-				}
-
-				Dialogs.showInfo(view, "Import Transcriptions", "Transcription file successfully imported.");
-			} catch (IOException e) {
-				Dialogs.showError(view, "Import Exception", "Could not import the transcription file.");
-			} finally {
-				view.getProgressBar().setIndeterminate(false);
-			}
-		}
-	}
-
-	private void handleBatchExport() {
-        final BatchExportModel export = BatchExportDialog.showBatchExportDialog(this);
-
-        if (Objects.nonNull(export)) {
-            final BatchExecutor batchExec = new BatchExecutor(this, this.getProjectModel(), export);
-
-            try {
-                final int totalFiles =
-                        (int) Lists.newArrayList(this.getProjectModel().getImageFiles()).stream().count();
-
-                final ProgressMonitor progressMonitor = new ProgressMonitor(view, "Processing:", "", 0, totalFiles + 1);
-                progressMonitor.setProgress(0);
-
-                try (final BufferedWriter errorLog = Files.newBufferedWriter(
-                        export.getDestinationDir().resolve("errors.log"),
-                        StandardCharsets.UTF_8)) {
-
-                    batchExec.start(progressMonitor, errorLog);
-
-                }
-            } catch (IOException | InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
 
 	private void handleCompareSymbolToPrototype() {
 		final Symbol selected = view.getSymbolOverview().getSymbolVariantList().getList().getSelectedValue();
@@ -657,38 +532,7 @@ public class TesseractApp extends WindowAdapter
 		return null;
 	}
 
-	private void handleNewProject() {
-		if (mode == ApplicationMode.BOX_FILE && !handleCloseBoxFile()) {
-			return;
-		} else if (mode == ApplicationMode.PROJECT && !handleCloseProject()) {
-			return;
-		}
-
-		final ProjectModel result = NewProjectDialog.showDialog(view);
-
-		if (Objects.isNull(result)) {
-			return;
-		}
-
-		setProjectModel(result);
-
-		projectModel = result;
-		final ProjectModel projectModel = result;
-
-		final DefaultListModel<PageThumbnail> pages = view.getPages().getListModel();
-
-		final ThumbnailWorker thumbnailLoader = new ThumbnailWorker(projectModel, pages);
-		thumbnailLoader.execute();
-		this.thumbnailLoader = thumbnailLoader;
-
-		final PageListWorker pageListLoader = new PageListWorker(projectModel, pages);
-
-		pageListLoader.execute();
-
-		setApplicationMode(ApplicationMode.PROJECT);
-	}
-
-	private void setProjectModel(ProjectModel model) {
+	public void setProjectModel(ProjectModel model) {
 		projectModel = model;
 
 		if (Objects.nonNull(model)) {
@@ -699,65 +543,10 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
-	private void handleOpenBoxFile() {
-		if (mode == ApplicationMode.BOX_FILE && !handleCloseBoxFile()) {
-			return;
-		} else if (mode == ApplicationMode.PROJECT && !handleCloseProject()) {
-			return;
-		}
-
-		final JFileChooser fc = new JFileChooser();
-
-		final String lastBoxFile = PreferencesUtil.getPreferences().get(KEY_BOX_FILE, null);
-		if (lastBoxFile != null) {
-			final Path dir = Paths.get(lastBoxFile).getParent();
-			if (Files.isDirectory(dir)) {
-				fc.setCurrentDirectory(dir.toFile());
-			}
-		}
-
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fc.setFileFilter(new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "Image files";
-			}
-
-			@Override
-			public boolean accept(File f) {
-				final String fname = f.getName();
-				return f.canRead()
-						&& (f.isDirectory() || f.isFile() && (fname.endsWith(".png") || fname.endsWith(".tif")
-								|| fname.endsWith(".tiff") || fname.endsWith(".jpg") || fname.endsWith(".jpeg")));
-			}
-		});
-		final int result = fc.showOpenDialog(view);
-
-		if (result == JFileChooser.APPROVE_OPTION) {
-			final Path imageFile = fc.getSelectedFile().toPath();
-
-			try {
-				final Path boxFile = FileNames.replaceExtension(imageFile, "box");
-				final BufferedImage image = ImageIO.read(imageFile.toFile());
-				final List<Symbol> boxes = BoxFileReader.readBoxFile(boxFile, image.getHeight());
-
-				setApplicationMode(ApplicationMode.BOX_FILE);
-
-				view.getScale().setTo100Percent();
-
-				PreferencesUtil.getPreferences().put(KEY_BOX_FILE, boxFile.toAbsolutePath().toString());
-
-				setBoxFileModel(new BoxFileModel(boxFile, image, boxes));
-			} catch (IOException | IndexOutOfBoundsException e) {
-				Dialogs.showError(view, "Error", "Box file could not be opened.");
-			}
-		}
-	}
-
 	private void handleOpenProject() {
 		if (mode == ApplicationMode.BOX_FILE && !handleCloseBoxFile()) {
 			return;
-		} else if (mode == ApplicationMode.PROJECT && !handleCloseProject()) {
+		} else if (mode == ApplicationMode.PROJECT && !menuHandler.handleCloseProject()) {
 			return;
 		}
 
@@ -801,23 +590,7 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
-	private void handleSaveBoxFile() {
-		final BoxFileModel boxFileModel = getBoxFileModel();
-
-		if (Objects.nonNull(boxFileModel)) {
-			try {
-				BoxFileWriter.writeBoxFile(boxFileModel);
-
-				Dialogs.showInfo(view, "Saved", "The box file has been saved.");
-			} catch (IOException e) {
-				Dialogs.showError(view, "Error", "Box file could not be written.");
-			}
-		} else {
-			Dialogs.showWarning(view, "Warning", "No box file present.");
-		}
-	}
-
-	private BoxFileModel getBoxFileModel() {
+	public BoxFileModel getBoxFileModel() {
 		if (mode == ApplicationMode.NONE) {
 			return null;
 		} else if (mode == ApplicationMode.BOX_FILE) {
@@ -840,19 +613,7 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
-	private boolean handleCloseProject() {
-		final boolean really = Dialogs.ask(view, "Confirmation", "Do you really want to close this project?");
-
-		if (really) {
-			setPageModel(null);
-			setProjectModel(null);
-			setApplicationMode(ApplicationMode.NONE);
-		}
-
-		return really;
-	}
-
-	private boolean handleCloseBoxFile() {
+	public boolean handleCloseBoxFile() {
 		final boolean really = Dialogs.ask(view, "Confirmation",
 				"Do you really want to close this box file? All unsaved changes will be lost.");
 
@@ -1106,143 +867,7 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
-	private void handlePreferences() {
-		final PreferencesDialog prefDialog = new PreferencesDialog();
-		final ResultState result = prefDialog.showPreferencesDialog(view);
-		if (result == ResultState.APPROVE) {
-			final Preferences globalPrefs = PreferencesUtil.getPreferences();
-			try {
-				final Path langdataDir = Paths.get(prefDialog.getTfLangdataDir().getText());
-				if (Files.isDirectory(langdataDir)) {
-					globalPrefs.put(PreferencesDialog.KEY_LANGDATA_DIR, langdataDir.toString());
-				}
-
-				final String renderingFont = (String) prefDialog.getComboRenderingFont().getSelectedItem();
-				globalPrefs.put(PreferencesDialog.KEY_RENDERING_FONT, renderingFont);
-
-				final String editorFont = (String) prefDialog.getComboEditorFont().getSelectedItem();
-				globalPrefs.put(PreferencesDialog.KEY_EDITOR_FONT, editorFont);
-
-				// Update the page segmentation mode if necessary
-				int currentPageSegMode = getPageSegmentationMode();
-				int pageSegMode = prefDialog.getPageSegmentationMode();
-				boolean hasPageSegModeChanged = currentPageSegMode != pageSegMode;
-				if (hasPageSegModeChanged) {
-					globalPrefs.putInt(PreferencesDialog.KEY_PAGE_SEG_MODE, pageSegMode);
-					pageRecognitionProducer.setPageSegmentationMode(pageSegMode);
-
-					// Update model with new segmentation mode
-					if (activeComponent instanceof PageModelComponent) {
-						final PageModel pm = ((PageModelComponent) activeComponent).getPageModel();
-						if (Objects.nonNull(pm)) {
-							setImageModel(pm.getImageModel());
-						}
-						
-						Optional.ofNullable(pm).ifPresent(it -> setImageModel(it.getImageModel()));
-					}
-				}
-
-				view.getRecognitionPane().setRenderingFont(renderingFont);
-				if (view.getActiveComponent() == view.getRecognitionPane()) {
-					view.getRecognitionPane().render();
-				}
-
-				view.getEvaluationPane().setEditorFont(editorFont);
-			} catch (Exception e) {
-				Dialogs.showWarning(view, "Error", "Could not save the preferences.");
-			}
-		}
-	}
-
-	private void handleCharacterHistogram() {
-		final JFileChooser fc = new JFileChooser();
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fc.setFileFilter(new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "Text files";
-			}
-
-			@Override
-			public boolean accept(File f) {
-				return f.canRead();
-			}
-		});
-
-		final int approved = fc.showOpenDialog(view);
-		if (approved == JFileChooser.APPROVE_OPTION) {
-			final Path textFile = fc.getSelectedFile().toPath();
-
-			try {
-				final BufferedReader reader = Files.newBufferedReader(textFile, StandardCharsets.UTF_8);
-
-				final Map<Character, Integer> histogram = new TreeMap<>();
-
-				// build up a histogram
-				int c;
-				while ((c = reader.read()) != -1) {
-					final char character = (char) c;
-
-					Integer val = histogram.get(character);
-
-					if (val == null) {
-						val = 0;
-					}
-
-					histogram.put(character, val + 1);
-				}
-
-				final CharacterHistogram ch = new CharacterHistogram(histogram);
-				ch.setLocationRelativeTo(view);
-				ch.setVisible(true);
-
-			} catch (IOException e) {
-				Dialogs.showError(view, "Invalid text file", "Could not read the text file.");
-			}
-		}
-	}
-
-	private void handleInspectUnicharset() {
-		final JFileChooser fc = new JFileChooser();
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fc.setFileFilter(new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "Unicharset files";
-			}
-
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().endsWith("unicharset");
-			}
-		});
-
-		final int approved = fc.showOpenDialog(view);
-		if (approved == JFileChooser.APPROVE_OPTION) {
-			final Path unicharsetFile = fc.getSelectedFile().toPath();
-			try (final BufferedReader unicharsetReader = Files.newBufferedReader(unicharsetFile,
-					StandardCharsets.UTF_8)) {
-
-				final Unicharset unicharset = Unicharset.readFrom(unicharsetReader);
-
-				// show the unicharset dialog
-				final UnicharsetDebugger uniDebugger = new UnicharsetDebugger(unicharset);
-				uniDebugger.setLocationRelativeTo(view);
-				uniDebugger.setVisible(true);
-			} catch (IOException e) {
-				Dialogs.showError(view, "Invalid Unicharset",
-						"Could not read the unicharset file. It may have an incompatible version.");
-			}
-		}
-	}
-
-	private void handleTesseractTrainer() {
-		final TesseractTrainer trainer = new TesseractTrainer();
-		trainer.setLocationRelativeTo(view);
-		trainer.setVisible(true);
-	}
-
-	private int getPageSegmentationMode() {
+	public int getPageSegmentationMode() {
 		return PreferencesUtil.getPreferences().getInt(PreferencesDialog.KEY_PAGE_SEG_MODE,
 				PreferencesDialog.DEFAULT_PSM_MODE);
 	}
@@ -1402,18 +1027,10 @@ public class TesseractApp extends WindowAdapter
 		}
 	}
 
-	private void handleExit() {
-		windowClosing(new WindowEvent(view, WindowEvent.WINDOW_CLOSING));
-
-		if (!view.isVisible()) {
-			windowClosed(new WindowEvent(view, WindowEvent.WINDOW_CLOSED));
-		}
-	}
-
 	@Override
 	public void windowClosing(WindowEvent e) {
 		if (mode == ApplicationMode.PROJECT) {
-			if (!handleCloseProject()) {
+			if (!menuHandler.handleCloseProject()) {
 				return;
 			}
 		} else if (mode == ApplicationMode.BOX_FILE) {
@@ -1487,50 +1104,9 @@ public class TesseractApp extends WindowAdapter
 	}
 
 	public void setApplicationMode(ApplicationMode mode) {
+		ApplicationMode current = this.mode;
 		this.mode = mode;
-		final JTabbedPane mainTabs = view.getMainTabs();
-
-		final boolean projectEnabled;
-		final boolean boxFileEnabled;
-		if (mode == ApplicationMode.NONE) {
-			mainTabs.setEnabled(false);
-			projectEnabled = false;
-			boxFileEnabled = false;
-		} else {
-			mainTabs.setEnabled(true);
-			boxFileEnabled = true;
-
-			if (mode == ApplicationMode.BOX_FILE) {
-				// set box file tabs active
-				mainTabs.setEnabledAt(0, false);
-				mainTabs.setEnabledAt(1, true);
-				mainTabs.setEnabledAt(2, true);
-				mainTabs.setEnabledAt(3, false);
-				mainTabs.setEnabledAt(4, false);
-				mainTabs.setSelectedIndex(1);
-
-				projectEnabled = false;
-			} else {
-				// set all tabs active
-				mainTabs.setEnabledAt(0, true);
-				mainTabs.setEnabledAt(1, true);
-				mainTabs.setEnabledAt(2, true);
-				mainTabs.setEnabledAt(3, true);
-				mainTabs.setEnabledAt(4, true);
-
-				projectEnabled = true;
-			}
-		}
-
-		view.getMenuItemSaveBoxFile().setEnabled(boxFileEnabled);
-		// view.getMenuItemSavePage().setEnabled(projectEnabled);
-		// view.getMenuItemSaveProject().setEnabled(projectEnabled);
-		view.getMenuItemOpenProjectDirectory().setEnabled(projectEnabled);
-		view.getMenuItemBatchExport().setEnabled(projectEnabled);
-		view.getMenuItemImportTranscriptions().setEnabled(projectEnabled);
-		view.getMenuItemCloseProject().setEnabled(projectEnabled);
-
-		view.getSymbolOverview().getSymbolVariantList().getCompareToPrototype().setVisible(projectEnabled);
+		view.onApplicationModeChanged(mode, current);
 	}
 
 	public ApplicationMode getApplicationMode() {
@@ -1541,6 +1117,29 @@ public class TesseractApp extends WindowAdapter
 	public void scaleChanged(ScaleEvent scaleEvent) {
 		if (scaleEvent.getSource() == view.getScale()) {
 			view.getScaleLabel().setText(scaleEvent.getSource().toString());
+		}
+	}
+
+	public void setThumbnailLoader(ThumbnailWorker thumbnailLoader) {
+		this.thumbnailLoader = thumbnailLoader;
+	}
+
+	public MainComponent getActiveComponent() {
+		return activeComponent;
+	}
+
+	@Override
+	public void closeProject() {
+		this.setPageModel(null);
+		this.setProjectModel(null);
+		this.setApplicationMode(ApplicationMode.NONE);
+	}
+
+	@Override
+	public void exit() {
+		this.windowClosing(new WindowEvent(this.getView(), WindowEvent.WINDOW_CLOSING));
+		if (!this.getView().isVisible()) {
+			this.windowClosed(new WindowEvent(this.getView(), WindowEvent.WINDOW_CLOSED));
 		}
 	}
 }

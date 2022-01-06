@@ -1,30 +1,5 @@
 package de.vorb.tesseract.gui.view;
 
-import de.vorb.tesseract.gui.model.PageThumbnail;
-import de.vorb.tesseract.gui.model.PreferencesUtil;
-import de.vorb.tesseract.gui.model.Scale;
-import de.vorb.tesseract.gui.util.Filter;
-import de.vorb.tesseract.gui.util.Resources;
-import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog;
-import de.vorb.tesseract.gui.view.i18n.Labels;
-import de.vorb.tesseract.gui.view.renderer.PageListCellRenderer;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSeparator;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -34,12 +9,31 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
-
 import java.util.prefs.Preferences;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+
+import de.vorb.tesseract.gui.model.ApplicationMode;
+import de.vorb.tesseract.gui.model.PageThumbnail;
+import de.vorb.tesseract.gui.model.PreferencesUtil;
+import de.vorb.tesseract.gui.model.Scale;
+import de.vorb.tesseract.gui.util.Filter;
+import de.vorb.tesseract.gui.util.Resources;
+import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog;
+import de.vorb.tesseract.gui.view.i18n.Labels;
+import de.vorb.tesseract.gui.view.renderer.PageListCellRenderer;
 
 /**
  * Swing component that allows to compare the results of Tesseract.
@@ -57,27 +51,8 @@ public class TesseractFrame extends JFrame {
 	private final JLabel lblScaleFactor;
 	private final JProgressBar pbLoadPage;
 	private final JSplitPane spMain;
-	private final JMenuItem mnNewProject;
 	private final JTabbedPane tabsMain;
-	private final JMenuItem mnPreferences;
-	private final JMenuItem mnBatchExport;
-	private final JSeparator separator_1;
-	private final JMenuItem mnOpenProjectDirectory;
-	private final JMenuItem mnOpenBoxFile;
-	private final JMenu mnEdit;
-
-	private final JSeparator separator_2;
-	private final JMenuItem mnCloseProject;
-	private final JMenuItem mnSaveBoxFile;
-	private final JMenuItem mnImportTranscriptions;
-
-	private final JMenu mnTools;
-	private final JMenuItem mnCharacterHistogram;
-	private final JMenuItem mnInspectUnicharset;
-
-	private final JMenuItem mnExit;
-	private final JMenuItem mnTesseractTrainer;
-
+	
 	private final Scale scale;
 
 	/**
@@ -166,94 +141,8 @@ public class TesseractFrame extends JFrame {
 		setTitle(Labels.getLabel(getLocale(), "frame_title"));
 
 		// Menu
-
-		final JMenuBar menuBar = new JMenuBar();
+		final JMenuBar menuBar = new MenuBar();
 		setJMenuBar(menuBar);
-
-		final JMenu mnFile = new JMenu(Labels.getLabel(getLocale(), "menu_file"));
-		menuBar.add(mnFile);
-
-		mnNewProject = new JMenuItem("New Project");
-		mnNewProject.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
-		mnFile.add(mnNewProject);
-
-		mnOpenBoxFile = new JMenuItem("Open Box File...");
-		mnOpenBoxFile
-				.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mnFile.add(mnOpenBoxFile);
-
-		separator_2 = new JSeparator();
-		mnFile.add(separator_2);
-
-		mnSaveBoxFile = new JMenuItem("Save Box File");
-		mnSaveBoxFile
-				.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mnSaveBoxFile.setEnabled(false);
-		mnSaveBoxFile.setIcon(new ImageIcon(TesseractFrame.class.getResource("/icons/table_save.png")));
-		mnFile.add(mnSaveBoxFile);
-
-		mnOpenProjectDirectory = new JMenuItem("Open Project Directory");
-		mnOpenProjectDirectory.setEnabled(false);
-		mnOpenProjectDirectory.setIcon(new ImageIcon(TesseractFrame.class.getResource("/icons/folder_explore.png")));
-		mnFile.add(mnOpenProjectDirectory);
-
-		mnCloseProject = new JMenuItem("Close Project");
-		mnCloseProject.setEnabled(false);
-		mnFile.add(mnCloseProject);
-
-		separator_1 = new JSeparator();
-		mnFile.add(separator_1);
-
-		mnImportTranscriptions = new JMenuItem("Import Transcriptions...");
-		mnImportTranscriptions.setEnabled(false);
-		mnImportTranscriptions
-				.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mnFile.add(mnImportTranscriptions);
-
-		mnBatchExport = new JMenuItem("Batch Export...");
-		mnBatchExport.setEnabled(false);
-		mnBatchExport.setIcon(new ImageIcon(TesseractFrame.class.getResource("/icons/book_next.png")));
-		mnBatchExport
-				.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mnFile.add(mnBatchExport);
-
-		final JSeparator separator = new JSeparator();
-		mnFile.add(separator);
-
-		mnExit = new JMenuItem("Exit");
-		mnExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
-		mnFile.add(mnExit);
-
-		mnEdit = new JMenu("Edit");
-		menuBar.add(mnEdit);
-
-		mnPreferences = new JMenuItem("Preferences");
-		mnPreferences.setIcon(new ImageIcon(TesseractFrame.class.getResource("/icons/cog.png")));
-		mnEdit.add(mnPreferences);
-
-		mnTools = new JMenu("Tools");
-		menuBar.add(mnTools);
-
-		mnCharacterHistogram = new JMenuItem("Character Histogram...");
-		mnTools.add(mnCharacterHistogram);
-
-		mnInspectUnicharset = new JMenuItem("Debug Unicharset...");
-		mnTools.add(mnInspectUnicharset);
-
-		mnTesseractTrainer = new JMenuItem("Tesseract Trainer...");
-		mnTesseractTrainer
-				.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		mnTools.add(mnTesseractTrainer);
-
-		final JMenu mnHelp = new JMenu(Labels.getLabel(getLocale(), "menu_help"));
-		menuBar.add(mnHelp);
-
-		final JMenuItem mntmAbout = new JMenuItem(Labels.getLabel(getLocale(), "menu_about"));
-		mntmAbout.setIcon(new ImageIcon(TesseractFrame.class.getResource("/icons/information.png")));
-		mntmAbout.addActionListener(
-				e -> JOptionPane.showMessageDialog(TesseractFrame.this, Labels.getLabel(getLocale(), "about_message"),
-						Labels.getLabel(getLocale(), "about_title"), JOptionPane.INFORMATION_MESSAGE));
-		mnHelp.add(mntmAbout);
 
 		// Contents
 
@@ -326,53 +215,7 @@ public class TesseractFrame extends JFrame {
 		return tabsMain;
 	}
 
-	public JMenuItem getMenuItemNewProject() {
-		return mnNewProject;
-	}
-
-	public JMenuItem getMenuItemOpenBoxFile() {
-		return mnOpenBoxFile;
-	}
-
-	public JMenuItem getMenuItemSaveBoxFile() {
-		return mnSaveBoxFile;
-	}
-
-	public JMenuItem getMenuItemCloseProject() {
-		return mnCloseProject;
-	}
-
-	public JMenuItem getMenuItemOpenProjectDirectory() {
-		return mnOpenProjectDirectory;
-	}
-
-	public JMenuItem getMenuItemImportTranscriptions() {
-		return mnImportTranscriptions;
-	}
-
-	public JMenuItem getMenuItemBatchExport() {
-		return mnBatchExport;
-	}
-
-	public JMenuItem getMenuItemExit() {
-		return mnExit;
-	}
-
-	public JMenuItem getMenuItemPreferences() {
-		return mnPreferences;
-	}
-
-	public JMenuItem getMenuItemCharacterHistogram() {
-		return mnCharacterHistogram;
-	}
-
-	public JMenuItem getMenuItemInspectUnicharset() {
-		return mnInspectUnicharset;
-	}
-
-	public JMenuItem getMenuItemTesseractTrainer() {
-		return mnTesseractTrainer;
-	}
+	
 
 	public FilteredList<PageThumbnail> getPages() {
 		return listPages;
@@ -408,5 +251,43 @@ public class TesseractFrame extends JFrame {
 
 	public FilteredList<String> getTraineddataFiles() {
 		return listTrainingFiles;
+	}
+
+	public void onApplicationModeChanged(ApplicationMode newMode, ApplicationMode currentMode) {
+		boolean projectEnabled;
+		boolean boxFileEnabled;
+		if (newMode == ApplicationMode.NONE) {
+			tabsMain.setEnabled(false);
+			projectEnabled = false;
+			boxFileEnabled = false;
+		} else {
+			tabsMain.setEnabled(true);
+			boxFileEnabled = true;
+	
+			if (newMode == ApplicationMode.BOX_FILE) {
+				// set box file tabs active
+				tabsMain.setEnabledAt(0, false);
+				tabsMain.setEnabledAt(1, true);
+				tabsMain.setEnabledAt(2, true);
+				tabsMain.setEnabledAt(3, false);
+				tabsMain.setEnabledAt(4, false);
+				tabsMain.setSelectedIndex(1);
+	
+				projectEnabled = false;
+			} else {
+				// set all tabs active
+				tabsMain.setEnabledAt(0, true);
+				tabsMain.setEnabledAt(1, true);
+				tabsMain.setEnabledAt(2, true);
+				tabsMain.setEnabledAt(3, true);
+				tabsMain.setEnabledAt(4, true);
+	
+				projectEnabled = true;
+			}
+		}
+		
+		MenuBar menuBar = (MenuBar) this.getJMenuBar();
+		menuBar.onApplicationModeChanged(boxFileEnabled, projectEnabled);	
+		this.glyphOverview.getSymbolVariantList().getCompareToPrototype().setVisible(projectEnabled);
 	}
 }
