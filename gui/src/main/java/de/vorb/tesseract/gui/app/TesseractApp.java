@@ -99,7 +99,7 @@ public class TesseractApp extends WindowAdapter
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractApp.class);
 	private static TesseractApp tesseractApp;
 	
-	public static TesseractApp get() {
+	static TesseractApp get() {
 		return tesseractApp;
 	}
 

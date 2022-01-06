@@ -113,9 +113,9 @@ class MenuHandler {
 	}
 
 	private void handleBatchExport() {
-		BatchExportModel export = BatchExportDialog.showBatchExportDialog(app);
+		BatchExportModel export = BatchExportDialog.showBatchExportDialog();
 		if (Objects.nonNull(export)) {
-			BatchExecutor batchExec = new BatchExecutor(app, app.getProjectModel(), export);
+			BatchExecutor batchExec = new BatchExecutor(export);
 
 			try {
 				int totalFiles = (int) StreamSupport.stream(app.getProjectModel().getImageFiles().spliterator(), false)

@@ -1,22 +1,5 @@
 package de.vorb.tesseract.gui.work;
 
-import de.vorb.tesseract.gui.app.ITesseractApp;
-import de.vorb.tesseract.gui.app.TesseractApp;
-import de.vorb.tesseract.gui.model.BatchExportModel;
-import de.vorb.tesseract.gui.model.ProjectModel;
-import de.vorb.tesseract.gui.util.DocumentWriter;
-import de.vorb.tesseract.gui.view.dialogs.Dialogs;
-import de.vorb.tesseract.tools.preprocessing.Preprocessor;
-import de.vorb.tesseract.util.TraineddataFiles;
-
-import eu.digitisation.input.Batch;
-import eu.digitisation.input.Parameters;
-import eu.digitisation.input.WarningException;
-import eu.digitisation.output.Report;
-
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingUtilities;
-import javax.xml.transform.TransformerException;
 import java.awt.Desktop;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -37,16 +20,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
+import javax.xml.transform.TransformerException;
+
+import de.vorb.tesseract.gui.app.AppProxy;
+import de.vorb.tesseract.gui.app.ITesseractApp;
+import de.vorb.tesseract.gui.model.BatchExportModel;
+import de.vorb.tesseract.gui.model.ProjectModel;
+import de.vorb.tesseract.gui.util.DocumentWriter;
+import de.vorb.tesseract.gui.view.dialogs.Dialogs;
+import de.vorb.tesseract.tools.preprocessing.Preprocessor;
+import de.vorb.tesseract.util.TraineddataFiles;
+import eu.digitisation.input.Batch;
+import eu.digitisation.input.Parameters;
+import eu.digitisation.input.WarningException;
+import eu.digitisation.output.Report;
+
 public class BatchExecutor {
     private final ITesseractApp tesserApp;
     private final ProjectModel project;
     private final BatchExportModel export;
 
-    public BatchExecutor(ITesseractApp tesserApp, ProjectModel project,
-            BatchExportModel export) {
-
-        this.tesserApp = tesserApp;
-        this.project = project;
+    public BatchExecutor(BatchExportModel export) {
+        this.tesserApp = AppProxy.getApp();
+        this.project = AppProxy.getApp().getProjectModel();
         this.export = export;
     }
 

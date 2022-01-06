@@ -31,6 +31,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import de.vorb.tesseract.gui.app.AppProxy;
 import de.vorb.tesseract.gui.app.ITesseractApp;
 import de.vorb.tesseract.gui.model.BatchExportModel;
 
@@ -56,7 +57,7 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 
 	private final ITesseractApp app;
 
-	private BatchExportModel exportModel = null;
+	private BatchExportModel exportModel;
 	private JCheckBox chckbxExportImages;
 	private JLabel lblExport;
 	private JCheckBox chckbxXml;
@@ -65,11 +66,11 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 	/**
 	 * Create the panel.
 	 */
-	public BatchExportDialog(ITesseractApp app) {
+	public BatchExportDialog() {
+		this.app = AppProxy.getApp();
 		setIconImage(Toolkit.getDefaultToolkit().getImage(BatchExportDialog.class.getResource("/icons/book_next.png")));
 		setLocationRelativeTo(app.getView());
 
-		this.app = app;
 
 		setResizable(false);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -256,8 +257,8 @@ public class BatchExportDialog extends JDialog implements ActionListener {
 		return tfDestinationDir;
 	}
 
-	public static BatchExportModel showBatchExportDialog(ITesseractApp app) {
-		final BatchExportDialog dialog = new BatchExportDialog(app);
+	public static BatchExportModel showBatchExportDialog() {
+		final BatchExportDialog dialog = new BatchExportDialog();
 		dialog.setVisible(true);
 
 		return dialog.exportModel;
