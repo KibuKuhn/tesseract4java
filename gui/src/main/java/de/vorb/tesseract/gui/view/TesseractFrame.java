@@ -30,7 +30,7 @@ import de.vorb.tesseract.gui.model.PageThumbnail;
 import de.vorb.tesseract.gui.model.PreferencesUtil;
 import de.vorb.tesseract.gui.model.Scale;
 import de.vorb.tesseract.gui.util.Filter;
-import de.vorb.tesseract.gui.util.Resources;
+import de.vorb.tesseract.gui.util.Icons;
 import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog;
 import de.vorb.tesseract.gui.view.i18n.Labels;
 import de.vorb.tesseract.gui.view.renderer.PageListCellRenderer;
@@ -52,7 +52,7 @@ public class TesseractFrame extends JFrame {
 	private final JProgressBar pbLoadPage;
 	private final JSplitPane spMain;
 	private final JTabbedPane tabsMain;
-	
+
 	private final Scale scale;
 
 	/**
@@ -138,7 +138,7 @@ public class TesseractFrame extends JFrame {
 
 		listTrainingFiles.setBorder(BorderFactory.createTitledBorder("Traineddata File"));
 
-		setTitle(Labels.getLabel(getLocale(), "frame_title"));
+		setTitle(Labels.getLabel("frame_title"));
 
 		// Menu
 		final JMenuBar menuBar = new MenuBar();
@@ -179,18 +179,18 @@ public class TesseractFrame extends JFrame {
 		getContentPane().add(spMain, BorderLayout.CENTER);
 
 		tabsMain = new JTabbedPane();
-		tabsMain.addTab(Labels.getLabel(getLocale(), "tab_main_preprocessing"), Resources.getIcon("contrast"),
+		tabsMain.addTab(Labels.getLabel("tab_main_preprocessing"), Icons.get().getIcon("contrast"),
 				preprocessingPane);
 
-		tabsMain.addTab(Labels.getLabel(getLocale(), "tab_main_boxeditor"), Resources.getIcon("table_edit"), boxEditor);
+		tabsMain.addTab(Labels.getLabel("tab_main_boxeditor"), Icons.get().getIcon("table_edit"), boxEditor);
 
-		tabsMain.addTab(Labels.getLabel(getLocale(), "tab_main_symboloverview"),
-				Resources.getIcon("application_view_icons"), glyphOverview);
+		tabsMain.addTab(Labels.getLabel("tab_main_symboloverview"),
+				Icons.get().getIcon("application_view_icons"), glyphOverview);
 
-		tabsMain.addTab(Labels.getLabel(getLocale(), "tab_main_recognition"),
-				Resources.getIcon("application_tile_horizontal"), recognitionPane);
+		tabsMain.addTab(Labels.getLabel("tab_main_recognition"),
+				Icons.get().getIcon("application_tile_horizontal"), recognitionPane);
 
-		tabsMain.addTab(Labels.getLabel(getLocale(), "tab_main_evaluation"), Resources.getIcon("chart_pie"),
+		tabsMain.addTab(Labels.getLabel("tab_main_evaluation"), Icons.get().getIcon("chart_pie"),
 				evaluationPane);
 
 		spMain.setRightComponent(tabsMain);
@@ -215,7 +215,7 @@ public class TesseractFrame extends JFrame {
 		return tabsMain;
 	}
 
-	
+
 
 	public FilteredList<PageThumbnail> getPages() {
 		return listPages;
@@ -263,7 +263,7 @@ public class TesseractFrame extends JFrame {
 		} else {
 			tabsMain.setEnabled(true);
 			boxFileEnabled = true;
-	
+
 			if (newMode == ApplicationMode.BOX_FILE) {
 				// set box file tabs active
 				tabsMain.setEnabledAt(0, false);
@@ -272,7 +272,7 @@ public class TesseractFrame extends JFrame {
 				tabsMain.setEnabledAt(3, false);
 				tabsMain.setEnabledAt(4, false);
 				tabsMain.setSelectedIndex(1);
-	
+
 				projectEnabled = false;
 			} else {
 				// set all tabs active
@@ -281,13 +281,13 @@ public class TesseractFrame extends JFrame {
 				tabsMain.setEnabledAt(2, true);
 				tabsMain.setEnabledAt(3, true);
 				tabsMain.setEnabledAt(4, true);
-	
+
 				projectEnabled = true;
 			}
 		}
-		
+
 		MenuBar menuBar = (MenuBar) this.getJMenuBar();
-		menuBar.onApplicationModeChanged(boxFileEnabled, projectEnabled);	
+		menuBar.onApplicationModeChanged(boxFileEnabled, projectEnabled);
 		this.glyphOverview.getSymbolVariantList().getCompareToPrototype().setVisible(projectEnabled);
 	}
 }

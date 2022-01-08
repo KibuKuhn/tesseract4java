@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 
+import de.vorb.tesseract.gui.app.AppProxy;
 import de.vorb.tesseract.gui.event.IEventBus;
 import de.vorb.tesseract.gui.event.MenuEvent;
 import de.vorb.tesseract.gui.event.MenuEvents;
@@ -27,15 +28,15 @@ class MenuBar extends JMenuBar {
 	private BatchExport batchExport;
 	private ImportTranscriptions importTranscriptions;
 	private CloseProject closeProject;
-	
+
 	MenuBar() {
 		initUI();
 	}
-	
-	private void initUI() {
-	
 
-		JMenu file = new JMenu(Labels.getLabel(getLocale(), "menu_file"));
+	private void initUI() {
+
+
+		JMenu file = new JMenu(Labels.getLabel("menu_file"));
 		this.add(file);
 		file.add(new NewProject());
 		file.add(new OpenBoxFile());
@@ -59,7 +60,7 @@ class MenuBar extends JMenuBar {
 		tools.add(new InspectUnicharset());
 		tools.add(new TesseractTrainer());
 
-		JMenu help = new JMenu(Labels.getLabel(getLocale(), "menu_help"));
+		JMenu help = new JMenu(Labels.getLabel("menu_help"));
 		this.add(help);
 		help.add(new About());
 
@@ -68,7 +69,7 @@ class MenuBar extends JMenuBar {
 	private class NewProject extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private NewProject() {
 			putValue(NAME, "New Project");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_DOWN_MASK));
@@ -76,14 +77,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.NewProject, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.NewProject, e.getSource()));
 		}
 	}
-	
+
 	private class OpenBoxFile extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private OpenBoxFile() {
 			putValue(NAME, "Open Box File...");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
@@ -91,14 +92,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.OpenBoxFile, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.OpenBoxFile, e.getSource()));
 		}
 	}
-	
+
 	private class SaveBoxFile extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private SaveBoxFile() {
 			putValue(NAME, "Save Box File");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
@@ -108,14 +109,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.SaveBoxFile, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.SaveBoxFile, e.getSource()));
 		}
 	}
-	
+
 	private class OpenProjectDirectory extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private OpenProjectDirectory() {
 			putValue(NAME, "Open Project Directory");
 			setEnabled(false);
@@ -124,30 +125,30 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.OpenProjectDirectory, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.OpenProjectDirectory, e.getSource()));
 		}
 	}
-	
+
 	private class CloseProject extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private CloseProject() {
 			putValue(NAME, "Close Project");
 			setEnabled(false);
 		}
-		
+
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.Close, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.Close, e.getSource()));
 		}
 	}
-	
+
 	private class ImportTranscriptions extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private ImportTranscriptions() {
 			putValue(NAME, "Import Transcriptions...");
 			setEnabled(false);
@@ -156,14 +157,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.ImportTranscriptions, e.getSource()));					
+			IEventBus.get().post(new MenuEvent(MenuEvents.ImportTranscriptions, e.getSource()));
 		}
 	}
-	
+
 	private class BatchExport extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private BatchExport() {
 			putValue(NAME, "Batch Export...");
 			setEnabled(false);
@@ -173,14 +174,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.Batch, e.getSource()));			
+			IEventBus.get().post(new MenuEvent(MenuEvents.Batch, e.getSource()));
 		}
 	}
-	
+
 	private class Exit extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private Exit() {
 			putValue(NAME, "Exit");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, CTRL_DOWN_MASK));
@@ -188,14 +189,14 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.Exit, e.getSource()));		
+			IEventBus.get().post(new MenuEvent(MenuEvents.Exit, e.getSource()));
 		}
 	}
-	
+
 	private class Preferences extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private Preferences() {
 			putValue(NAME, "Preferences");
 			putValue(LARGE_ICON_KEY, new ImageIcon(TesseractFrame.class.getResource("/icons/cog.png")));
@@ -203,44 +204,44 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.Preferences, e.getSource()));					
-		}		
+			IEventBus.get().post(new MenuEvent(MenuEvents.Preferences, e.getSource()));
+		}
 	}
-	
+
 	private class CharacterHistogram extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private CharacterHistogram() {
 			putValue(NAME, "Character Histogram...");
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.CharacterHistogram, e.getSource()));			
+			IEventBus.get().post(new MenuEvent(MenuEvents.CharacterHistogram, e.getSource()));
 		}
-		
+
 	}
-	
+
 	private class InspectUnicharset extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private InspectUnicharset() {
 			putValue(NAME, "Debug Unicharset...");
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.InspectUnicharset, e.getSource()));					
+			IEventBus.get().post(new MenuEvent(MenuEvents.InspectUnicharset, e.getSource()));
 		}
-		
+
 	}
-	
+
 	private class TesseractTrainer extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private TesseractTrainer() {
 			putValue(NAME, "Tesseract Trainer...");
 			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, CTRL_DOWN_MASK | SHIFT_DOWN_MASK));
@@ -248,26 +249,24 @@ class MenuBar extends JMenuBar {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			IEventBus.get().post(new MenuEvent(MenuEvents.TesseractTrainer, e.getSource()));					
-		}	
+			IEventBus.get().post(new MenuEvent(MenuEvents.TesseractTrainer, e.getSource()));
+		}
 	}
-	
+
 	private class About extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		private About() {
-			putValue(NAME, Labels.getLabel(getLocale(), "menu_about"));
+			putValue(NAME, Labels.getLabel("menu_about"));
 			putValue(LARGE_ICON_KEY, new ImageIcon(TesseractFrame.class.getResource("/icons/information.png")));
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JOptionPane.showMessageDialog(MenuBar.this, Labels.getLabel(getLocale(), "about_message"),
-							Labels.getLabel(getLocale(), "about_title"), JOptionPane.INFORMATION_MESSAGE);
-						
+			IEventBus.get().post(new MenuEvent(MenuEvents.About, e.getSource()));
 		}
-		
+
 	}
 
 	void onApplicationModeChanged(boolean boxFileEnabled, boolean projectEnabled) {
@@ -276,13 +275,5 @@ class MenuBar extends JMenuBar {
 		this.batchExport.setEnabled(projectEnabled);
 		this.importTranscriptions.setEnabled(projectEnabled);
 		this.closeProject.setEnabled(projectEnabled);
-//		view.getMenuItemSaveBoxFile().setEnabled(boxFileEnabled);
-//		// view.getMenuItemSavePage().setEnabled(projectEnabled);
-//		// view.getMenuItemSaveProject().setEnabled(projectEnabled);		
-//		view.getMenuItemOpenProjectDirectory().setEnabled(projectEnabled);
-//		view.getMenuItemBatchExport().setEnabled(projectEnabled);
-//		view.getMenuItemImportTranscriptions().setEnabled(projectEnabled);
-//		view.getMenuItemCloseProject().setEnabled(projectEnabled);
-		
 	}
 }

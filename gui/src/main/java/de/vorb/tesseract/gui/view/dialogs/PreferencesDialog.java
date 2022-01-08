@@ -1,17 +1,14 @@
 package de.vorb.tesseract.gui.view.dialogs;
 
-import de.vorb.tesseract.gui.model.PreferencesUtil;
+import static java.awt.GridBagConstraints.EAST;
+import static java.awt.GridBagConstraints.HORIZONTAL;
+import static java.awt.GridBagConstraints.NONE;
+import static java.awt.GridBagConstraints.RELATIVE;
+import static java.awt.GridBagConstraints.REMAINDER;
+import static java.awt.GridBagConstraints.WEST;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -19,209 +16,368 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
+import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.border.EmptyBorder;
+
+import de.vorb.tesseract.gui.model.PreferencesUtil;
+
 public class PreferencesDialog extends JDialog {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private static final String[] PSM_MODES = {
-            "0 - PSM_OSD_ONLY",
-            "1 - PSM_AUTO_OSD",
-            "2 - PSM_AUTO_ONLY",
-            "3 - (DEFAULT) PSM_AUTO",
-            "4 - PSM_SINGLE_COLUMN",
-            "5 - PSM_SINGLE_BLOCK_VERT_TEXT",
-            "6 - PSM_SINGLE_BLOCK",
-            "7 - PSM_SINGLE_LINE",
-            "8 - PSM_SINGLE_WORD",
-            "9 - PSM_CIRCLE_WORD",
-            "10 - PSM_SINGLE_CHAR",
-            "11 - PSM_SPARSE_TEXT",
-            "12 - PSM_SPARSE_TEXT_OSD",
-            "13 - PSM_RAW_LINE",
-    };
-    public static final int DEFAULT_PSM_MODE = 3;
+	private static final String[] PSM_MODES = { "0 - PSM_OSD_ONLY", "1 - PSM_AUTO_OSD", "2 - PSM_AUTO_ONLY",
+			"3 - (DEFAULT) PSM_AUTO", "4 - PSM_SINGLE_COLUMN", "5 - PSM_SINGLE_BLOCK_VERT_TEXT", "6 - PSM_SINGLE_BLOCK",
+			"7 - PSM_SINGLE_LINE", "8 - PSM_SINGLE_WORD", "9 - PSM_CIRCLE_WORD", "10 - PSM_SINGLE_CHAR",
+			"11 - PSM_SPARSE_TEXT", "12 - PSM_SPARSE_TEXT_OSD", "13 - PSM_RAW_LINE", };
+	public static final int DEFAULT_PSM_MODE = 3;
 
-    public static final String KEY_LANGDATA_DIR = "langdata_dir";
-    public static final String KEY_RENDERING_FONT = "rendering_font";
-    public static final String KEY_EDITOR_FONT = "editor_font";
-    public static final String KEY_PAGE_SEG_MODE = "page_seg_mode";
+	public static final String KEY_LANGDATA_DIR = "langdata_dir";
+	public static final String KEY_RENDERING_FONT = "rendering_font";
+	public static final String KEY_EDITOR_FONT = "editor_font";
+	public static final String KEY_PAGE_SEG_MODE = "page_seg_mode";
+	public static final String KEY_LANGUAGE = "language";
+	public static final String KEY_LAF = "laf";
 
-    private final JPanel contentPanel = new JPanel();
-    private JTextField tfLangdataDir;
+	private JTextField tfLangdataDir;
+	private JComboBox<String> comboRenderingFont;
+	private JComboBox<String> comboEditorFont;
+	private JComboBox<String> comboPageSegMode;
+	private JComboBox<Locale> comboLanguage;
 
-    private final JComboBox<String> comboRenderingFont;
-    private final JComboBox<String> comboEditorFont;
-    private final JComboBox<String> comboPageSegMode;
+	private ResultState resultState = ResultState.CANCEL;
 
-    private ResultState resultState = ResultState.CANCEL;
+	private JComboBox<LookAndFeelInfo> comboLaf;
 
-    public enum ResultState {
-        APPROVE, CANCEL
-    }
 
-    /**
-     * Create the dialog.
-     */
-    public PreferencesDialog() {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(PreferencesDialog.class.getResource("/logos/logo_16.png")));
-        final Preferences pref = PreferencesUtil.getPreferences();
+	public enum ResultState {
+		APPROVE, CANCEL
+	}
 
-        setModalityType(ModalityType.APPLICATION_MODAL);
-        setTitle("General Preferences");
-        setBounds(100, 100, 450, 300);
-        getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        GridBagLayout gbl_contentPanel = new GridBagLayout();
-        gbl_contentPanel.columnWidths = new int[]{0, 0, 0, 0};
-        gbl_contentPanel.rowHeights = new int[]{0, 0, 0};
-        gbl_contentPanel.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
-        gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-        contentPanel.setLayout(gbl_contentPanel);
-        {
-            JLabel lbllangdataDirectory = new JLabel("\"Langdata\" directory:");
-            GridBagConstraints gbc_lbllangdataDirectory = new GridBagConstraints();
-            gbc_lbllangdataDirectory.anchor = GridBagConstraints.EAST;
-            gbc_lbllangdataDirectory.insets = new Insets(0, 0, 0, 5);
-            gbc_lbllangdataDirectory.gridx = 0;
-            gbc_lbllangdataDirectory.gridy = 1;
-            contentPanel.add(lbllangdataDirectory, gbc_lbllangdataDirectory);
-        }
-        {
-            tfLangdataDir = new JTextField(pref.get(KEY_LANGDATA_DIR, ""));
-            GridBagConstraints gbc_textField_1 = new GridBagConstraints();
-            gbc_textField_1.insets = new Insets(0, 0, 0, 5);
-            gbc_textField_1.fill = GridBagConstraints.HORIZONTAL;
-            gbc_textField_1.gridx = 1;
-            gbc_textField_1.gridy = 1;
-            contentPanel.add(tfLangdataDir, gbc_textField_1);
-            tfLangdataDir.setColumns(30);
-        }
-        {
-            JButton btnSelect_1 = new JButton("Select...");
-            btnSelect_1.addActionListener(evt -> {
-                final JFileChooser fc = new JFileChooser();
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	
+	public PreferencesDialog() {
+		Preferences pref = PreferencesUtil.getPreferences();
+		initUI(pref);
+		initData(pref);
+	}
 
-                try {
-                    final File currentDir = new File(
-                            tfLangdataDir.getText());
-                    if (currentDir.isDirectory()) {
-                        fc.setCurrentDirectory(currentDir);
-                    }
-                } catch (Exception e) {
-                }
+	private void initUI(Preferences pref) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PreferencesDialog.class.getResource("/logos/logo_16.png")));
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setTitle("General Preferences");
+		// setBounds(100, 100, 450, 300);
+		JPanel pane = (JPanel) getContentPane();
+		pane.setLayout(new GridBagLayout());
+		pane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-                final int result = fc.showOpenDialog(PreferencesDialog.this);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    tfLangdataDir.setText(fc.getSelectedFile().getAbsolutePath());
-                }
-            });
-            GridBagConstraints gbc_btnSelect_1 = new GridBagConstraints();
-            gbc_btnSelect_1.anchor = GridBagConstraints.WEST;
-            gbc_btnSelect_1.gridx = 2;
-            gbc_btnSelect_1.gridy = 1;
-            contentPanel.add(btnSelect_1, gbc_btnSelect_1);
-        }
-        {
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-            {
-                JButton okButton = new JButton("Save");
-                okButton.addActionListener(evt -> {
-                    PreferencesDialog.this.setState(ResultState.APPROVE);
-                    PreferencesDialog.this.dispose();
-                });
-                okButton.setActionCommand("OK");
-                buttonPane.add(okButton);
-                getRootPane().setDefaultButton(okButton);
-            }
-            {
-                JButton cancelButton = new JButton("Cancel");
-                cancelButton.addActionListener(evt -> {
-                    PreferencesDialog.this.setState(ResultState.CANCEL);
-                    PreferencesDialog.this.dispose();
-                });
-                cancelButton.setActionCommand("Cancel");
-                buttonPane.add(cancelButton);
-            }
-        }
+		GridBagConstraints constraints = new GridBagConstraints();
 
-        final GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        final String[] availableFontFamilyNames = graphicsEnvironment.getAvailableFontFamilyNames();
+		//language
+		constraints.anchor = WEST;
+		constraints.insets = new Insets(0, 0, 5, 5);
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		pane.add(new JLabel("Language:"), constraints);
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.gridwidth = REMAINDER;
+		constraints.weightx = 1;
+		constraints.insets.right = 0;
+		comboLanguage = new JComboBox<>();
+		comboLanguage.setRenderer(new LocaleRenderer());
+		pane.add(comboLanguage, constraints);
+		
+		//L&F
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.fill = NONE;
+		constraints.weightx = 0;
+		constraints.gridwidth = 1;
+		constraints.insets.right = 5;
+		pane.add(new JLabel("Look & Feel:"), constraints);
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.gridwidth = REMAINDER;
+		constraints.weightx = 1;
+		constraints.insets.right = 0;
+		comboLaf = new JComboBox<>();
+		comboLaf.setRenderer(new LafRenderer());
+		pane.add(comboLaf, constraints);
+		
+		//Langdata
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.fill = NONE;
+		constraints.weightx = 0;
+		constraints.gridwidth = 1;
+		constraints.insets.right = 5;
+		pane.add(new JLabel("\"Langdata\" directory:"), constraints);
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.fill = HORIZONTAL;
+		constraints.weightx = 1;
+		tfLangdataDir = new JTextField(pref.get(KEY_LANGDATA_DIR, ""));
+		tfLangdataDir.setColumns(30);
+		pane.add(tfLangdataDir, constraints);
+		constraints.gridwidth = REMAINDER;
+		constraints.fill = NONE;
+		constraints.anchor = EAST;
+		constraints.insets.right = 0;
+		pane.add(new JButton(new SelectAction()), constraints);
+		
+		// Rendering font
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.gridwidth = 1;
+		constraints.insets.right = 5;
+		constraints.anchor = WEST;
+		constraints.fill = NONE;
+		constraints.weightx = 0;
+		pane.add(new JLabel("Rendering font:"), constraints);
+		
+		
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.gridwidth = REMAINDER;
+		constraints.weightx = 1;
+		constraints.fill = HORIZONTAL;
+		constraints.insets.right = 0;
+		comboRenderingFont = new JComboBox<>();
+		pane.add(comboRenderingFont, constraints);
+		
+		// Editor font
+		constraints.gridx = 0;
+		constraints.gridy +=1;
+		constraints.fill = NONE;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.fill = NONE;
+		constraints.insets.right = 5;
+		pane.add(new JLabel("Editor font:"), constraints);
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.gridwidth = REMAINDER;
+		constraints.weightx = 1;
+		constraints.fill = HORIZONTAL;
+		constraints.insets.right = 0;
+		comboEditorFont = new JComboBox<>();
+		pane.add(comboEditorFont, constraints);
+		
+		// Page Segmentation Modes
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.fill = NONE;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0;
+		constraints.fill = NONE;
+		constraints.insets.right = 5;
+		pane.add(new JLabel("Page Segmentation Mode:"), constraints);
+				
+		comboPageSegMode = new JComboBox<>();
+		constraints.fill = HORIZONTAL;
+		constraints.gridx = RELATIVE;
+		constraints.gridwidth = REMAINDER;
+		constraints.weightx = 1;
+		constraints.fill = HORIZONTAL;
+		constraints.insets.right = 0;
+		pane.add(comboPageSegMode, constraints);
+		
+		//filler
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.gridwidth = REMAINDER;
+		constraints.weighty = 1;
+		constraints.fill = GridBagConstraints.BOTH;
+		pane.add(Box.createGlue(), constraints);
+		
+		addButtonPane(pane, constraints);
+		
+		pack();
+		Dimension size = getSize();
+		size.height += 10;
+		setMinimumSize(size);
+	}
+	
+	private void initData(Preferences pref) {
+		Locale[] supportedLocales = new Locale[] {Locale.ENGLISH, Locale.GERMAN};
+		Locale defaultLocale = Locale.getDefault();
+		Locale initialLocale = Arrays.stream(supportedLocales)
+		                             .filter(sl -> sl.getLanguage().equals(defaultLocale.getLanguage()) ||
+		                           		  		sl.getLanguage().equals(defaultLocale.getLanguage()))
+		                             .findFirst()
+		                             .orElse(Locale.ENGLISH);
+		String language = pref.get(KEY_LANGUAGE, initialLocale.getLanguage());
+		Locale selectedLocale = Arrays.stream(supportedLocales)
+		                              .filter(l -> l.getLanguage().equals(language))
+		                              .findFirst()
+		                              .orElse(initialLocale);
+		DefaultComboBoxModel<Locale> model = new DefaultComboBoxModel<>();
+		Arrays.stream(supportedLocales)
+		      .sorted((l1, l2) -> l1.getDisplayLanguage().compareTo(l2.getDisplayLanguage()))
+		      .forEach(model::addElement);
+		comboLanguage.setModel(model);
+		comboLanguage.setSelectedItem(selectedLocale);
+		
+		DefaultComboBoxModel<LookAndFeelInfo> lafModel = new DefaultComboBoxModel<>();
+		LookAndFeelInfo[] installedLookAndFeels = UIManager.getInstalledLookAndFeels();
+		Arrays.stream(installedLookAndFeels)
+		      .sorted((l1, l2) -> l1.getName().compareTo(l2.getName()))
+		      .forEach(lafModel::addElement);
+		String initialLafClassName = UIManager.getSystemLookAndFeelClassName();
+		String selectedLafClassName = pref.get(KEY_LAF, initialLafClassName);
+		LookAndFeelInfo selectedLaflInfo = Arrays.stream(installedLookAndFeels)		      
+		                                         .filter(laf -> laf.getClassName().equals(selectedLafClassName))
+		                                         .findFirst()
+		                                         .get();
+		comboLaf.setModel(lafModel);
+		comboLaf.setSelectedItem(selectedLaflInfo);
+		
+		final GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		final String[] availableFontFamilyNames = graphicsEnvironment.getAvailableFontFamilyNames();
+		final String initialFontFamilyName = pref.get(PreferencesDialog.KEY_EDITOR_FONT, Font.SANS_SERIF);
+		Arrays.stream(availableFontFamilyNames)
+		      .sorted()
+		      .forEach(comboRenderingFont::addItem);
+		comboRenderingFont.setSelectedItem(initialFontFamilyName);
+		
+		
+		final String initialEditorFontFamilyName = pref.get(PreferencesDialog.KEY_RENDERING_FONT, Font.MONOSPACED);
+		Arrays.stream(availableFontFamilyNames)
+		      .sorted()
+		      .forEach(comboEditorFont::addItem);
+		comboEditorFont.setSelectedItem(initialEditorFontFamilyName);
+		
+		final int pageSegMode = pref.getInt(PreferencesDialog.KEY_PAGE_SEG_MODE, DEFAULT_PSM_MODE);
+		Arrays.stream(PSM_MODES)
+		      .sorted()
+		      .forEach(comboPageSegMode::addItem);
+		comboPageSegMode.setSelectedItem(PSM_MODES[pageSegMode]);
+	}
 
-        // Rendering font
-        addGridLabel(0, 2, "Rendering font:");
-        final String initialFontFamilyName = pref.get(PreferencesDialog.KEY_EDITOR_FONT, Font.SANS_SERIF);
-        comboRenderingFont = createGridComboBox(1, 2, availableFontFamilyNames, initialFontFamilyName);
+	private void addButtonPane(JPanel pane, GridBagConstraints constraints) {
+		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		JButton okButton = new JButton(new SaveAction());
+		getRootPane().setDefaultButton(okButton);
+		buttonPane.add(okButton);
+		buttonPane.add(Box.createHorizontalStrut(5));
+		buttonPane.add(new JButton(new CancelAction()));		
+		constraints.gridx = 0;
+		constraints.gridy += 1;
+		constraints.fill = HORIZONTAL;
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridwidth = REMAINDER;
+		constraints.gridheight = REMAINDER;
+		pane.add(buttonPane, constraints);
+	}
 
-        // Editor font
-        addGridLabel(0, 3, "Editor font:");
-        final String initialEditorFontFamilyName = pref.get(PreferencesDialog.KEY_RENDERING_FONT, Font.MONOSPACED);
-        comboEditorFont = createGridComboBox(1, 3, availableFontFamilyNames, initialEditorFontFamilyName);
+	private class CancelAction extends AbstractAction {
 
-        // Page Segmentation Modes
-        addGridLabel(0, 4, "Page Segmentation Mode:");
-        final int pageSegMode = pref.getInt(PreferencesDialog.KEY_PAGE_SEG_MODE, DEFAULT_PSM_MODE);
-        comboPageSegMode = createGridComboBox(1, 4, PSM_MODES, PSM_MODES[pageSegMode]);
+		private static final long serialVersionUID = 1L;
 
-        pack();
-        setMinimumSize(getSize());
-    }
+		private CancelAction() {
+			putValue(NAME, "Cancel");
+			putValue(ACTION_COMMAND_KEY, "Cancel");
+		}
 
-    private void setState(ResultState state) {
-        this.resultState = state;
-    }
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			PreferencesDialog.this.setState(ResultState.CANCEL);
+			PreferencesDialog.this.dispose();
+		}
+	}
 
-    public JTextField getTfLangdataDir() {
-        return tfLangdataDir;
-    }
+	private class SaveAction extends AbstractAction {
 
-    public JComboBox<String> getComboRenderingFont() {
-        return comboRenderingFont;
-    }
+		private static final long serialVersionUID = 1L;
 
-    public JComboBox<String> getComboEditorFont() {
-        return comboEditorFont;
-    }
+		public SaveAction() {
+			putValue(NAME, "Save");
+			putValue(ACTION_COMMAND_KEY, "OK");
+		}
 
-    public int getPageSegmentationMode() {
-        return comboPageSegMode.getSelectedIndex();
-    }
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			PreferencesDialog.this.setState(ResultState.APPROVE);
+			PreferencesDialog.this.dispose();
+		}
+	}
 
-    public ResultState showPreferencesDialog(Component parent) {
-        setLocationRelativeTo(parent);
-        setVisible(true);
-        return resultState;
-    }
+	private class SelectAction extends AbstractAction {
 
-    private Component addGridLabel(int gridX, int gridY, String label) {
-        JLabel jLabel = new JLabel(label);
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.EAST;
-        constraints.insets = new Insets(0, 0, 0, 5);
-        constraints.gridx = gridX;
-        constraints.gridy = gridY;
-        contentPanel.add(jLabel, constraints);
-        return jLabel;
-    }
+		private static final long serialVersionUID = 1L;
 
-    private <T> JComboBox<T> createGridComboBox(int gridX, int gridY, T[] options, T selectedItem) {
-        JComboBox<T> jComboBox = new JComboBox<>();
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(0, 0, 0, 5);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridx = gridX;
-        constraints.gridy = gridY;
-        contentPanel.add(jComboBox, constraints);
+		private SelectAction() {
+			putValue(NAME, "Select...");
+		}
 
-        Arrays.stream(options).forEach(jComboBox::addItem);
-        jComboBox.setSelectedItem(selectedItem);
-        return jComboBox;
-    }
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			final JFileChooser fc = new JFileChooser();
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
+			try {
+				final File currentDir = new File(tfLangdataDir.getText());
+				if (currentDir.isDirectory()) {
+					fc.setCurrentDirectory(currentDir);
+				}
+			} catch (Exception e) {
+			}
+
+			final int result = fc.showOpenDialog(PreferencesDialog.this);
+			if (result == JFileChooser.APPROVE_OPTION) {
+				tfLangdataDir.setText(fc.getSelectedFile().getAbsolutePath());
+			}
+
+		};
+	}
+
+	private void setState(ResultState state) {
+		this.resultState = state;
+	}
+
+	public JTextField getTfLangdataDir() {
+		return tfLangdataDir;
+	}
+
+	public JComboBox<String> getComboRenderingFont() {
+		return comboRenderingFont;
+	}
+
+	public JComboBox<String> getComboEditorFont() {
+		return comboEditorFont;
+	}
+
+	public int getPageSegmentationMode() {
+		return comboPageSegMode.getSelectedIndex();
+	}
+
+	public ResultState showPreferencesDialog(Component parent) {
+		setLocationRelativeTo(parent);
+		setVisible(true);
+		return resultState;
+	}
+
+	public Locale getSelectedLanguage() {
+		return (Locale) comboLanguage.getSelectedItem();
+	}
+
+	public LookAndFeelInfo getSelectedLaf() {
+		return (LookAndFeelInfo) comboLaf.getSelectedItem();
+	}
 }

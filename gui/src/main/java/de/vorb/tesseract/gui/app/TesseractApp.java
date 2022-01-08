@@ -124,18 +124,13 @@ public class TesseractApp extends WindowAdapter
 
 	private static void setLookAndFeel() {
 		try {
-			String laf = System.getProperty("laf", UIManager.getSystemLookAndFeelClassName());
+			String laf = PreferencesUtil.getPreferences().get(PreferencesDialog.KEY_LAF, UIManager.getSystemLookAndFeelClassName());
 			UIManager.setLookAndFeel(laf);
 		} catch (Exception e1) {
-			// fail silently
 			try {
 				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 			} catch (Exception e2) {
-				// fail silently
 			}
-
-			// If the system LaF is not available, use whatever LaF is already
-			// being used.
 		}
 	}
 

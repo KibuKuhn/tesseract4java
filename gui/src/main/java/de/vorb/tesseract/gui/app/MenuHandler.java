@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -20,7 +21,9 @@ import java.util.stream.StreamSupport;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.filechooser.FileFilter;
 
 import org.slf4j.Logger;
@@ -40,6 +43,7 @@ import de.vorb.tesseract.gui.model.PageThumbnail;
 import de.vorb.tesseract.gui.model.PreferencesUtil;
 import de.vorb.tesseract.gui.model.ProjectModel;
 import de.vorb.tesseract.gui.view.PageModelComponent;
+import de.vorb.tesseract.gui.view.dialogs.AboutPane;
 import de.vorb.tesseract.gui.view.dialogs.BatchExportDialog;
 import de.vorb.tesseract.gui.view.dialogs.CharacterHistogram;
 import de.vorb.tesseract.gui.view.dialogs.Dialogs;
@@ -47,6 +51,7 @@ import de.vorb.tesseract.gui.view.dialogs.ImportTranscriptionDialog;
 import de.vorb.tesseract.gui.view.dialogs.NewProjectDialog;
 import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog;
 import de.vorb.tesseract.gui.view.dialogs.PreferencesDialog.ResultState;
+import de.vorb.tesseract.gui.view.i18n.Labels;
 import de.vorb.tesseract.gui.view.dialogs.UnicharsetDebugger;
 import de.vorb.tesseract.gui.work.BatchExecutor;
 import de.vorb.tesseract.gui.work.PageListWorker;
@@ -58,7 +63,7 @@ import de.vorb.util.FileNames;
 class MenuHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MenuHandler.class);
-	
+
 	static final String KEY_BOX_FILE = "box_file";
 
 	private ITesseractApp app;
@@ -71,6 +76,9 @@ class MenuHandler {
 	@Subscribe
 	public void handleMenuAction(MenuEvent event) {
 		switch (event.getType()) {
+		case About:
+			handleAbout();
+			break;
 		case Batch:
 			handleBatchExport();
 			break;
@@ -112,6 +120,10 @@ class MenuHandler {
 		}
 	}
 
+	private void handleAbout() {
+		AboutPane.showDialog(app.getView());
+	}
+
 	private void handleBatchExport() {
 		BatchExportModel export = BatchExportDialog.showBatchExportDialog();
 		if (Objects.nonNull(export)) {
@@ -135,7 +147,7 @@ class MenuHandler {
 		}
 	}
 
-	private void handleCharacterHistogram() {		
+	private void handleCharacterHistogram() {
 		JFileChooser fc = new JFileChooser();
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setFileFilter(new CharacterHistogramFileFilter());
@@ -175,7 +187,7 @@ class MenuHandler {
 
 	}
 
-	boolean handleCloseProject() {		
+	boolean handleCloseProject() {
 		final boolean really = Dialogs.ask(app.getView(), "Confirmation", "Do you really want to close this project?");
 		if (really) {
 			app.closeProject();
@@ -189,7 +201,7 @@ class MenuHandler {
 	}
 
 	private void handleImportTranscriptions() {
-		
+
 		final ImportTranscriptionDialog importDialog = new ImportTranscriptionDialog();
 		importDialog.setVisible(true);
 
@@ -249,7 +261,7 @@ class MenuHandler {
 	}
 
 	private void handleInspectUnicharset() {
-		
+
 		final JFileChooser fc = new JFileChooser();
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setFileFilter(new InspectUnicharsetFileFilter());
@@ -273,7 +285,7 @@ class MenuHandler {
 		}
 	}
 
-	private void handleNewProject() {		
+	private void handleNewProject() {
 		if (app.getApplicationMode() == ApplicationMode.BOX_FILE && !app.handleCloseBoxFile()) {
 			return;
 		} else if (app.getApplicationMode() == ApplicationMode.PROJECT && !handleCloseProject()) {
@@ -298,7 +310,7 @@ class MenuHandler {
 	}
 
 	private void handleOpenBoxFile() {
-		
+
 		if (app.getApplicationMode() == ApplicationMode.BOX_FILE && !app.handleCloseBoxFile()) {
 			return;
 		} else if (app.getApplicationMode() == ApplicationMode.PROJECT && !handleCloseProject()) {
@@ -335,7 +347,7 @@ class MenuHandler {
 	}
 
 	private void handleOpenProjectDirectory() {
-		
+
 		if (Desktop.isDesktopSupported()) {
 			try {
 				Desktop.getDesktop().browse(app.getProjectModel().getProjectDir().toUri());
@@ -343,62 +355,71 @@ class MenuHandler {
 				LOGGER.error(e.getMessage(), e);
 				Dialogs.showError(app.getView(), "Exception", "Project directory could not be opened.");
 			}
-		}
-		else {
+		} else {
 			LOGGER.error("Desktop not supported");
 		}
 	}
 
 	private void handlePreferences() {
-		
+
 		final PreferencesDialog prefDialog = new PreferencesDialog();
 		final ResultState result = prefDialog.showPreferencesDialog(app.getView());
-		if (result == ResultState.APPROVE) {
-			final Preferences globalPrefs = PreferencesUtil.getPreferences();
-			try {
-				final Path langdataDir = Paths.get(prefDialog.getTfLangdataDir().getText());
-				if (Files.isDirectory(langdataDir)) {
-					globalPrefs.put(PreferencesDialog.KEY_LANGDATA_DIR, langdataDir.toString());
-				}
+		if (result != ResultState.APPROVE) {
+			return;
+		}
 
-				final String renderingFont = (String) prefDialog.getComboRenderingFont().getSelectedItem();
-				globalPrefs.put(PreferencesDialog.KEY_RENDERING_FONT, renderingFont);
+		final Preferences globalPrefs = PreferencesUtil.getPreferences();
+		try {
+			Locale selectedLanguage = prefDialog.getSelectedLanguage();
+			globalPrefs.put(PreferencesDialog.KEY_LANGUAGE, selectedLanguage.getLanguage());
+			prefDialog.getSelectedLaf();
 
-				final String editorFont = (String) prefDialog.getComboEditorFont().getSelectedItem();
-				globalPrefs.put(PreferencesDialog.KEY_EDITOR_FONT, editorFont);
+			LookAndFeelInfo selectedLaf = prefDialog.getSelectedLaf();
+			globalPrefs.put(PreferencesDialog.KEY_LAF, selectedLaf.getClassName());
 
-				// Update the page segmentation mode if necessary
-				int currentPageSegMode = app.getPageSegmentationMode();
-				int pageSegMode = prefDialog.getPageSegmentationMode();
-				boolean hasPageSegModeChanged = currentPageSegMode != pageSegMode;
-				if (hasPageSegModeChanged) {
-					globalPrefs.putInt(PreferencesDialog.KEY_PAGE_SEG_MODE, pageSegMode);
-					app.getPageRecognitionProducer().setPageSegmentationMode(pageSegMode);
+			final Path langdataDir = Paths.get(prefDialog.getTfLangdataDir().getText());
+			if (Files.isDirectory(langdataDir)) {
+				globalPrefs.put(PreferencesDialog.KEY_LANGDATA_DIR, langdataDir.toString());
+			}
 
-					// Update model with new segmentation mode
-					if (app.getActiveComponent() instanceof PageModelComponent) {
-						final PageModel pageModel = ((PageModelComponent) app.getActiveComponent()).getPageModel();
-						if (Objects.nonNull(pageModel)) {
-							app.setImageModel(pageModel.getImageModel());
-						}
+			final String renderingFont = (String) prefDialog.getComboRenderingFont().getSelectedItem();
+			globalPrefs.put(PreferencesDialog.KEY_RENDERING_FONT, renderingFont);
+
+			final String editorFont = (String) prefDialog.getComboEditorFont().getSelectedItem();
+			globalPrefs.put(PreferencesDialog.KEY_EDITOR_FONT, editorFont);
+
+			// Update the page segmentation mode if necessary
+			int currentPageSegMode = app.getPageSegmentationMode();
+			int pageSegMode = prefDialog.getPageSegmentationMode();
+			boolean hasPageSegModeChanged = currentPageSegMode != pageSegMode;
+			if (hasPageSegModeChanged) {
+				globalPrefs.putInt(PreferencesDialog.KEY_PAGE_SEG_MODE, pageSegMode);
+				app.getPageRecognitionProducer().setPageSegmentationMode(pageSegMode);
+
+				// Update model with new segmentation mode
+				if (app.getActiveComponent() instanceof PageModelComponent) {
+					final PageModel pageModel = ((PageModelComponent) app.getActiveComponent()).getPageModel();
+					if (Objects.nonNull(pageModel)) {
+						app.setImageModel(pageModel.getImageModel());
 					}
 				}
-
-				app.getView().getRecognitionPane().setRenderingFont(renderingFont);
-				if (app.getView().getActiveComponent() == app.getView().getRecognitionPane()) {
-					app.getView().getRecognitionPane().render();
-				}
-
-				app.getView().getEvaluationPane().setEditorFont(editorFont);
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage(), e);
-				Dialogs.showWarning(app.getView(), "Error", "Could not save the preferences.");
 			}
+
+			app.getView().getRecognitionPane().setRenderingFont(renderingFont);
+			if (app.getView().getActiveComponent() == app.getView().getRecognitionPane()) {
+				app.getView().getRecognitionPane().render();
+			}
+
+			app.getView().getEvaluationPane().setEditorFont(editorFont);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			Dialogs.showWarning(app.getView(), "Error", "Could not save the preferences.");
 		}
+
 	}
 
 	private void handleSaveBoxFile() {
-		
+
 		final BoxFileModel boxFileModel = app.getBoxFileModel();
 
 		if (Objects.nonNull(boxFileModel)) {
@@ -414,7 +435,7 @@ class MenuHandler {
 		}
 	}
 
-	private void handleTesseractTrainer() {		
+	private void handleTesseractTrainer() {
 		final TesseractTrainer trainer = new TesseractTrainer();
 		trainer.setLocationRelativeTo(app.getView());
 		trainer.setVisible(true);
@@ -429,9 +450,8 @@ class MenuHandler {
 		@Override
 		public boolean accept(File f) {
 			final String fname = f.getName();
-			return f.canRead()
-					&& (f.isDirectory() || f.isFile() && (fname.endsWith(".png") || fname.endsWith(".tif")
-							|| fname.endsWith(".tiff") || fname.endsWith(".jpg") || fname.endsWith(".jpeg")));
+			return f.canRead() && (f.isDirectory() || f.isFile() && (fname.endsWith(".png") || fname.endsWith(".tif")
+					|| fname.endsWith(".tiff") || fname.endsWith(".jpg") || fname.endsWith(".jpeg")));
 		}
 	}
 
